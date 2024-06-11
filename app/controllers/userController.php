@@ -43,8 +43,17 @@ class UserController extends Controlador
                 return;
             }
 
-            // Verificar si las claves existen en el array
-            if (!isset($data['user']) || !isset($data['logo']) || !isset($data['estado'])) {
+            if (
+                !isset($data['lastname'])
+                || !isset($data['firstname'])
+                || !isset($data['middlename'])
+                || !isset($data['email'])
+                || !isset($data['password'])
+                || !isset($data['type'])
+                || !isset($data['language'])
+                || !isset($data['registration_date'])
+                || !isset($data['last_visit_date'])
+            ) {
                 echo json_encode([
                     'status' => false,
                     'message' => 'Datos incompletos en la solicitud'
@@ -52,17 +61,19 @@ class UserController extends Controlador
                 return;
             }
 
+            // Asignar los valores del array $data al array $datos
             $datos = [
-                'lastname' => trim($data['user']),
-                'firstname' => '',
-                'middlename' => '',
-                'email' => '',
-                'password' => '',
-                'type' => '',
-                'language' => '',
-                'registration_date' => '',
-                'last_visit_date' => '',
+                'lastname' => trim($data['lastname']),
+                'firstname' => trim($data['firstname']),
+                'middlename' => trim($data['middlename']),
+                'email' => trim($data['email']),
+                'password' => password_hash(trim($data['password']), PASSWORD_DEFAULT),
+                'type' => trim($data['type']),
+                'language' => trim($data['language']),
+                'registration_date' => trim($data['registration_date']),
+                'last_visit_date' => trim($data['last_visit_date']),
             ];
+
 
             // Llama al modelo para realizar la inserción del usuario
             if ($this->User->create($datos)) {
@@ -80,56 +91,73 @@ class UserController extends Controlador
     }
 
     public function putUser($id)
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+        // Leer el cuerpo de la solicitud
+        $body = file_get_contents('php://input');
 
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
+        // Decodificar el JSON recibido en un array asociativo
+        $data = json_decode($body, true);
 
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
+        // Verificar si json_decode tuvo éxito
+        if (is_null($data)) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al decodificar JSON'
+            ]);
+            return;
+        }
 
-            if (!isset($data['user']) || !isset($data['logo']) || !isset($data['estado'])) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ]);
-                return;
-            }
+        // Verificar si las claves existen en el array
+        if (
+            !isset($data['lastname'])
+            || !isset($data['firstname'])
+            || !isset($data['middlename'])
+            || !isset($data['email'])
+            || !isset($data['password'])
+            || !isset($data['type'])
+            || !isset($data['language'])
+            || !isset($data['registration_date'])
+            || !isset($data['last_visit_date'])
+        ) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Datos incompletos en la solicitud'
+            ]);
+            return;
+        }
 
-            $datos = [
-                'id' => $id,
-                'lastname' => trim($data['user']),
-                'firstname' => '',
-                'middlename' => '',
-                'email' => '',
-                'password' => '',
-                'type' => '',
-                'language' => '',
-                'registration_date' => '',
-                'last_visit_date' => '',
-            ];
+        // Asignar los valores del array $data al array $datos
+        $datos = [
+            'lastname' => trim($data['lastname']),
+            'firstname' => trim($data['firstname']),
+            'middlename' => trim($data['middlename']),
+            'email' => trim($data['email']),
+            // Si la contraseña es opcional en la actualización, debes verificar si se incluye y hashearla
+            'password' => isset($data['password']) ? password_hash(trim($data['password']), PASSWORD_DEFAULT) : '',
+            'type' => trim($data['type']),
+            'language' => trim($data['language']),
+            'registration_date' => trim($data['registration_date']),
+            'last_visit_date' => trim($data['last_visit_date']),
+        ];
 
-            // Llama al modelo para realizar la actualización del usuario
-            if ($this->User->update($datos, $id)) {
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Usuario actualizado exitosamente'
-                ]);
-            } else {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al actualizar el usuario'
-                ]);
-            }
+        // Remover campos vacíos para no actualizar con datos vacíos
+        $datos = array_filter($datos, function($value) {
+            return $value !== '';
+        });
+
+        // Llama al modelo para realizar la actualización del usuario
+        if ($this->User->update($datos, $id)) {
+            echo json_encode([
+                'status' => true,
+                'message' => 'Usuario actualizado exitosamente'
+            ]);
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Error al actualizar el usuario'
+            ]);
         }
     }
+}
 }

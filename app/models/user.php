@@ -52,10 +52,10 @@ class User
     public function update($datos, $id)
     {
         // Prepara la consulta SQL para actualizar un cliente
-        $this->db->query('UPDATE users SET id=:id, lastname=:lastname, firstname=:firstname, middlename=:middlename, email=:email, password=:password, type=:type, language=:language, registration_date=:registration_date, last_visit_date=:last_visit_date WHERE id = :id');
+        $this->db->query('UPDATE users SET lastname=:lastname, firstname=:firstname, middlename=:middlename, email=:email, password=:password, type=:type, language=:language, registration_date=:registration_date, last_visit_date=:last_visit_date WHERE id = :id');
 
         // Asigna valores a los parámetros de la consulta
-        $this->db->bind(':id', $datos['id']);
+        $this->db->bind(':id', $id);
         $this->db->bind(':lastname', $datos['lastname']);
         $this->db->bind(':firstname', $datos['firstname']);
         $this->db->bind(':middlename', $datos['middlename']);

@@ -1,4 +1,15 @@
 <?php
+
+// Configuración de los encabezados CORS
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Manejar solicitud de preflight
+    exit(0);
+}
 ////////////////////////////////////
 // Leemos el archivo de configuración
 ////////////////////////////////////
@@ -14,7 +25,7 @@ define('DB_SCHEMA', $Config['database']['schema']);
 /////////////////////////////////////
 // Ruta de la aplicacion
 /////////////////////////////////////
-define('RUTA_SEE',dirname(dirname(__FILE__)) . "/");
+define('RUTA_SEE', dirname(dirname(__FILE__)) . "/");
 
 ////////////////////////////////////
 // Ruta de la URL
