@@ -27,8 +27,10 @@ class User
         $this->db->bind(':id', $id);
         return $this->db->registro();
     }
-    public function create($datos)
+
+    public function save($datos)
     {
+        $this->db->query('SELECT * FROM users WHERE email = :email'. (!empty(":id")? ' AND id != :id': ''));
         // Se ejecuta una consulta SQL para insertar un nuevo cliente
         $this->db->query('INSERT INTO users (lastname, firstname, middlename, email, password, type, language, registration_date, last_visit_date) 
             VALUES (:lastname, :firstname, :middlename, :email, :password, :type, :language, :registration_date, :last_visit_date)');
@@ -48,11 +50,11 @@ class User
         return $this->db->execute();
     }
 
-
     public function update($datos, $id)
     {
         // Prepara la consulta SQL para actualizar un cliente
-        $this->db->query('UPDATE users SET lastname=:lastname, firstname=:firstname, middlename=:middlename, email=:email, password=:password, type=:type, language=:language, registration_date=:registration_date, last_visit_date=:last_visit_date WHERE id = :id');
+        $this->db->query('UPDATE users SET lastname=:lastname, firstname=:firstname, middlename=:middlename, email=:email, password=:password, type=:type, language=:language, 
+        registration_date=:registration_date, last_visit_date=:last_visit_date WHERE id = :id');
 
         // Asigna valores a los parámetros de la consulta
         $this->db->bind(':id', $id);
