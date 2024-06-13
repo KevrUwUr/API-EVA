@@ -1,89 +1,88 @@
 <?php
-// Definición de la clase Cliente
+// Definición de la clase User_Client
 class User_Client
 {
     // Propiedad privada para la conexión a la base de datos
     private $db;
 
     // Constructor de la clase
-    function __construct()
+    public function __construct()
     {
         // Se instancia la clase Base para la conexión a la base de datos
         $this->db = new Base;
     }
 
+    // Método para listar todos los registros de user_clients
     public function list()
     {
-        // Se ejecuta una consulta SQL para obtener la información de los clientes
         $this->db->query("SELECT * FROM user_clients");
-        // Retorna el resultado como un array asociativo
         return $this->db->registros();
     }
 
+    // Método para obtener un registro de user_clients por ID
     public function listByID($id)
     {
-        // Se ejecuta una consulta SQL para obtener la información del cliente por ID
         $this->db->query("SELECT * FROM user_clients WHERE id = :id");
         $this->db->bind(':id', $id);
         return $this->db->registro();
     }
 
+    // Método para crear una nueva asociación entre usuario y cliente
     public function create($datos)
     {
         try {
-            // Verificar si el idClient existe
+            // Verificar si el idClient y el idUser existen
             $this->db->query('SELECT COUNT(*) AS count FROM clients WHERE id = :idClient');
             $this->db->bind(':idClient', $datos['idClient']);
-            $result = $this->db->single();
-            if ($result['count'] > 0) {
-                // idClient existe, proceder con la inserción
-                $this->db->query('INSERT INTO user_clients(idUser, idClient) VALUES (:idUser,:idClient)');
+            $resultClient = $this->db->single();
 
-                // Asignar valores a los parámetros
+            $this->db->query('SELECT COUNT(*) AS count FROM users WHERE id = :idUser');
+            $this->db->bind(':idUser', $datos['idUser']);
+            $resultUser = $this->db->single();
+
+            // Verificar si ambos existen
+            if ($resultClient['count'] > 0 && $resultUser['count'] > 0) {
+                // idClient e idUser existen, proceder con la inserción
+                $this->db->query('INSERT INTO user_clients (idUser, idClient) VALUES (:idUser, :idClient)');
                 $this->db->bind(':idUser', $datos['idUser']);
-                $this->db->bind(':isClient', $datos['idClient']);
+                $this->db->bind(':idClient', $datos['idClient']);
 
                 // Ejecutar la consulta y retornar true si tiene éxito
                 if ($this->db->execute()) {
-                    return json_encode([
-                        'status' => true,
-                        'message' => 'El cliente se asocio al usuario exitosamente'
-                    ]);
+                    return true;
                 } else {
-                    return json_encode([
-                        'status' => false,
-                        'message' => 'El cliente no se asocio al usuario'
-                    ]);
+                    return 'Error al insertar la asociación usuario-cliente';
                 }
             } else {
-                // idClient no existe, retornar mensaje de error
-                return 'idClient no encontrado';
+                // idClient o idUser no existe, retornar mensaje de error
+                return 'idClient o idUser no encontrado';
             }
         } catch (PDOException $e) {
-            return json_encode([
-                'status' => false,
-                'message' => 'Error de base de datos: ' . $e->getMessage()
-            ]);
+            // Capturar excepciones de base de datos
+            return 'Error de base de datos: ' . $e->getMessage();
         }
     }
 
-
+    // Método para actualizar una asociación entre usuario y cliente
     public function update($datos, $id)
     {
-        // Prepara la consulta SQL para actualizar un cliente
-        $this->db->query('UPDATE survey_set SET title=:title, start_date=:start_date, end_date=:end_date, description=:description, link=:link, type=:type, idClient=:idClient WHERE id = :id');
+        try {
+            // Preparar la consulta SQL para actualizar la asociación usuario-cliente
+            $this->db->query('UPDATE user_clients SET idUser=:idUser, idClient=:idClient WHERE id = :id');
+            $this->db->bind(':id', $id);
+            $this->db->bind(':idUser', $datos['idUser']);
+            $this->db->bind(':idClient', $datos['idClient']);
 
-        // Asigna valores a los parámetros de la consulta
-        $this->db->bind(':id', $id);
-        $this->db->bind(':title', $datos['title']);
-        $this->db->bind(':start_date', $datos['start_date']);
-        $this->db->bind(':end_date', $datos['end_date']);
-        $this->db->bind(':description', $datos['description']);
-        $this->db->bind(':link', $datos['link']);
-        $this->db->bind(':type', $datos['type']);
-        $this->db->bind(':idClient', $datos['idClient']);
-
-        // Ejecuta la consulta y retorna true si tiene éxito, false si falla
-        return $this->db->execute();
+            // Ejecutar la consulta y retornar true si tiene éxito
+            if ($this->db->execute()) {
+                return true;
+            } else {
+                return 'Error al actualizar la asociación usuario-cliente';
+            }
+        } catch (PDOException $e) {
+            // Capturar excepciones de base de datos
+            return 'Error de base de datos: ' . $e->getMessage();
+        }
     }
 }
+?>

@@ -161,4 +161,32 @@ class QuestionController extends Controlador
             }
         }
     }
+
+    public function deleteQuestion($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+            // Llama al modelo para realizar la eliminación de la pregunta
+            $result = $this->Question->delete($id);
+    
+            // Verificar el resultado de la eliminación
+            if ($result['status']) {
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Pregunta eliminada exitosamente'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al eliminar la pregunta: ' . $result['message']
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Método de solicitud no permitido'
+            ]);
+        }
+    }
+    
+
 }

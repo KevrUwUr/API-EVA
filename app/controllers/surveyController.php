@@ -18,11 +18,45 @@ class SurveyController extends Controlador
         echo json_encode($listar);
     }
 
+    public function SurveysActive()
+    {
+        $listar = $this->Survey->listActive();
+        echo json_encode($listar);
+    }
+    
+    public function SurveysInactive()
+    {
+        $listar = $this->Survey->listInactive();
+        echo json_encode($listar);
+    }
+
     public function SurveyByID($id)
     {
         $listar = $this->Survey->listByID($id);
         echo json_encode($listar);
     }
+
+    public function QuestionxSurvey($id)
+    {
+        // Llamar al método del modelo para obtener las preguntas de la encuesta
+        $questions = $this->Survey->listQuestionsxSurvey($id);
+        
+        // Verificar si se produjo un error en la consulta
+        if (isset($questions['error'])) {
+            echo json_encode([
+                'status' => false,
+                'message' => $questions['message']
+            ]);
+        } else {
+            // Convertir el resultado en formato JSON y enviarlo como respuesta
+            echo json_encode([
+                'status' => true,
+                'data' => $questions  // Aquí se asume que $questions ya es un array de resultados
+            ]);
+        }
+    }
+    
+    
 
     // Método para insertar un usuario
     public function postSurvey()
@@ -151,6 +185,41 @@ class SurveyController extends Controlador
                     'message' => 'Error al actualizar la encuesta'
                 ]);
             }
+        }
+    }
+
+    public function patchSurvey($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
+            $body = file_get_contents('php://input');
+            $data = json_decode($body, true);
+
+            if (is_null($data) || !isset($data['estado']) || !in_array($data['estado'], [0, 1])) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Datos incorrectos en la solicitud'
+                ]);
+                return;
+            }
+
+            $estado = $data['estado'];
+
+            if ($this->Survey->patchEstado($id, $estado)) {
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Estado de la encuesta actualizado exitosamente'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al actualizar el estado de la encuesta'
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Método no permitido'
+            ]);
         }
     }
 }
