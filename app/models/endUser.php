@@ -48,7 +48,7 @@ class EndUser
     {
         // Se ejecuta una consulta SQL para insertar un nuevo cliente
         $this->db->query('INSERT INTO end_users(firstname, middlename, lastname, email) 
-            VALUES (:firstname, middlename, lastname, email)');
+            VALUES (:firstname, :middlename, :lastname, :email)');
 
         // Asignar valores a los parámetros
         $this->db->bind(':firstname', $datos['firstname']);
@@ -63,7 +63,7 @@ class EndUser
     public function update($datos, $id)
     {
         // Prepara la consulta SQL para actualizar un cliente
-        $this->db->query('UPDATE users SET firstname=:firstname, middlename=:middlename, lastname=:lastname, email=:email, WHERE id = :id');
+        $this->db->query('UPDATE end_users SET firstname=:firstname, middlename=:middlename, lastname=:lastname, email=:email WHERE id = :id');
 
         // Asigna valores a los parámetros de la consulta
         $this->db->bind(':id', $id);
@@ -79,7 +79,7 @@ class EndUser
     public function patchEstado($id, $estado)
     {
         // Prepara la consulta SQL para actualizar el estado del usuario
-        $this->db->query('UPDATE users SET estado = :estado WHERE id = :id');
+        $this->db->query('UPDATE end_users SET estado = :estado WHERE id = :id');
         $this->db->bind(':id', $id);
         $this->db->bind(':estado', $estado);
         return $this->db->execute();
