@@ -36,6 +36,12 @@ class UserController extends Controlador
         echo json_encode($listar);
     }
 
+    public function ClientsxUser($id)
+    {
+        $listar = $this->User->listClientsxUser($id);
+        echo json_encode($listar);
+    }
+
     // Método para insertar un usuario
     public function postUser()
     {

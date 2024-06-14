@@ -44,6 +44,14 @@ class User
         return $this->db->registro();
     }
 
+    public function listClientsxUser($id)
+    {
+        // Se ejecuta una consulta SQL para obtener la información del cliente por ID
+        $this->db->query("SELECT c.id, c.client FROM users u INNER JOIN user_clients uc ON u.id = uc.idUser INNER JOIN clients c ON c.id = uc.idClient WHERE u.id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->registros();
+    }
+
     public function create($datos)
     {
         // Se ejecuta una consulta SQL para insertar un nuevo cliente
