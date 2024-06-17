@@ -3,63 +3,41 @@
 defined('BASEPATH') or exit('No se permite acceso directo');
 
 // Se declara la clase Home que extiende de Controlador
-class SurveyController extends Controlador
+class EndUserController extends Controlador
 {
     // Constructor de la clase
     public function __construct()
     {
-        // Se instancia el modelo Survey
-        $this->Survey = $this->modelo("survey");
+        // Se instancia el modelo EndUser
+        $this->EndUser = $this->modelo("endUser");
     }
 
-    public function Surveys()
+    public function EndUsers()
     {
-        $listar = $this->Survey->list();
+        $listar = $this->EndUser->list();
         echo json_encode($listar);
     }
 
-    public function SurveysActive()
+    public function EndUsersActive()
     {
-        $listar = $this->Survey->listActive();
-        echo json_encode($listar);
-    }
-    
-    public function SurveysInactive()
-    {
-        $listar = $this->Survey->listInactive();
+        $listar = $this->EndUser->listActive();
         echo json_encode($listar);
     }
 
-    public function SurveyByID($id)
+    public function EndUsersInactive()
     {
-        $listar = $this->Survey->listByID($id);
+        $listar = $this->EndUser->listInactive();
         echo json_encode($listar);
     }
 
-    public function QuestionxSurvey($id)
+    public function EndUserByID($id)
     {
-        // Llamar al método del modelo para obtener las preguntas de la encuesta
-        $questions = $this->Survey->listQuestionsxSurvey($id);
-        
-        // Verificar si se produjo un error en la consulta
-        if (isset($questions['error'])) {
-            echo json_encode([
-                'status' => false,
-                'message' => $questions['message']
-            ]);
-        } else {
-            // Convertir el resultado en formato JSON y enviarlo como respuesta
-            echo json_encode([
-                'status' => true,
-                'data' => $questions  // Aquí se asume que $questions ya es un array de resultados
-            ]);
-        }
+        $listar = $this->EndUser->listByID($id);
+        echo json_encode($listar);
     }
-    
-    
 
     // Método para insertar un usuario
-    public function postSurvey()
+    public function postEndUser()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Leer el cuerpo de la solicitud
@@ -78,13 +56,10 @@ class SurveyController extends Controlador
             }
 
             if (
-                !isset($data['title'])
-                || !isset($data['start_date'])
-                || !isset($data['end_date'])
-                || !isset($data['description'])
-                || !isset($data['link'])
-                || !isset($data['type'])
-                || !isset($data['idClient'])
+                !isset($data['lastname'])
+                || !isset($data['firstname'])
+                || !isset($data['middlename'])
+                || !isset($data['email'])
             ) {
                 echo json_encode([
                     'status' => false,
@@ -95,33 +70,29 @@ class SurveyController extends Controlador
 
             // Asignar los valores del array $data al array $datos
             $datos = [
-                'title' => trim($data['title']),
-                'start_date' => trim($data['start_date']),
-                'end_date' => trim($data['end_date']),
-                'description' => trim($data['description']),
-                'link' => trim($data['link']),
-                'type' => trim($data['type']),
-                'idClient' => trim($data['idClient']),
+                'lastname' => trim($data['lastname']),
+                'firstname' => trim($data['firstname']),
+                'middlename' => trim($data['middlename']),
+                'email' => trim($data['email']),
             ];
 
+
             // Llama al modelo para realizar la inserción del usuario
-            $result = $this->Survey->create($datos);
-            if ($result === true) {
+            if ($this->EndUser->create($datos)) {
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Encuesta creada exitosamente'
+                    'message' => 'EndUser creado exitosamente'
                 ]);
             } else {
-                // Suponiendo que $result contiene el mensaje de error de la base de datos en caso de falla
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al crear la encuesta: ' . $result
+                    'message' => 'Error al crear endUser'
                 ]);
             }
         }
     }
 
-    public function putSurvey($id)
+    public function putEndUser($id)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             // Leer el cuerpo de la solicitud
@@ -141,13 +112,10 @@ class SurveyController extends Controlador
 
             // Verificar si las claves existen en el array
             if (
-                !isset($data['title'])
-                || !isset($data['start_date'])
-                || !isset($data['end_date'])
-                || !isset($data['description'])
-                || !isset($data['link'])
-                || !isset($data['type'])
-                || !isset($data['idClient'])
+                !isset($data['lastname'])
+                || !isset($data['firstname'])
+                || !isset($data['middlename'])
+                || !isset($data['email'])
             ) {
                 echo json_encode([
                     'status' => false,
@@ -158,14 +126,10 @@ class SurveyController extends Controlador
 
             // Asignar los valores del array $data al array $datos
             $datos = [
-                'title' => trim($data['title']),
-                'start_date' => trim($data['start_date']),
-                'end_date' => trim($data['end_date']),
-                'description' => trim($data['description']),
-                // Si la contraseña es opcional en la actualización, debes verificar si se incluye y hashearla
-                'link' =>  trim($data['description']),
-                'type' => trim($data['type']),
-                'idClient' => trim($data['idClient']),
+                'lastname' => trim($data['lastname']),
+                'firstname' => trim($data['firstname']),
+                'middlename' => trim($data['middlename']),
+                'email' => trim($data['email']),
             ];
 
             // Remover campos vacíos para no actualizar con datos vacíos
@@ -174,21 +138,21 @@ class SurveyController extends Controlador
             });
 
             // Llama al modelo para realizar la actualización del usuario
-            if ($this->Survey->update($datos, $id)) {
+            if ($this->EndUser->update($datos, $id)) {
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Encuesta actualizado exitosamente'
+                    'message' => 'EndUser actualizado exitosamente'
                 ]);
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al actualizar la encuesta'
+                    'message' => 'Error al actualizar EndUser'
                 ]);
             }
         }
     }
 
-    public function patchSurvey($id)
+    public function patchEndUser($id)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
             $body = file_get_contents('php://input');
@@ -204,15 +168,15 @@ class SurveyController extends Controlador
 
             $estado = $data['estado'];
 
-            if ($this->Survey->patchEstado($id, $estado)) {
+            if ($this->EndUser->patchEstado($id, $estado)) {
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Estado de la encuesta actualizado exitosamente'
+                    'message' => 'Estado del endUser actualizado exitosamente'
                 ]);
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al actualizar el estado de la encuesta'
+                    'message' => 'Error al actualizar el estado del endUser'
                 ]);
             }
         } else {

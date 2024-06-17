@@ -18,9 +18,27 @@ class UserController extends Controlador
         echo json_encode($listar);
     }
 
+    public function UsersActive()
+    {
+        $listar = $this->User->listActive();
+        echo json_encode($listar);
+    }
+
+    public function UsersInactive()
+    {
+        $listar = $this->User->listInactive();
+        echo json_encode($listar);
+    }
+
     public function UserByID($id)
     {
         $listar = $this->User->listByID($id);
+        echo json_encode($listar);
+    }
+
+    public function ClientsxUser($id)
+    {
+        $listar = $this->User->listClientsxUser($id);
         echo json_encode($listar);
     }
 
@@ -76,7 +94,7 @@ class UserController extends Controlador
 
 
             // Llama al modelo para realizar la inserción del usuario
-            if ($this->User->save($datos)) {
+            if ($this->User->create($datos)) {
                 echo json_encode([
                     'status' => true,
                     'message' => 'Usuario creado exitosamente'
@@ -158,6 +176,41 @@ class UserController extends Controlador
                     'message' => 'Error al actualizar el usuario'
                 ]);
             }
+        }
+    }
+
+    public function patchUser($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
+            $body = file_get_contents('php://input');
+            $data = json_decode($body, true);
+
+            if (is_null($data) || !isset($data['estado']) || !in_array($data['estado'], [0, 1])) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Datos incorrectos en la solicitud'
+                ]);
+                return;
+            }
+
+            $estado = $data['estado'];
+
+            if ($this->User->patchEstado($id, $estado)) {
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Estado del usuario actualizado exitosamente'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al actualizar el estado del usuario'
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Método no permitido'
+            ]);
         }
     }
 }

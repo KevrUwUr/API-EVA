@@ -18,6 +18,18 @@ class clientController extends Controlador
         echo json_encode($listar);
     }
 
+    public function ClientsActive()
+    {
+        $listar = $this->Cliente->listActive();
+        echo json_encode($listar);
+    }
+    
+    public function ClientsInactive()
+    {
+        $listar = $this->Cliente->listInactive();
+        echo json_encode($listar);
+    }
+
     public function ClientByID($id)
     {
         $listar = $this->Cliente->listByID($id);
@@ -120,6 +132,41 @@ class clientController extends Controlador
                     'message' => 'Error al actualizar el cliente'
                 ]);
             }
+        }
+    }
+
+    public function patchClient($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
+            $body = file_get_contents('php://input');
+            $data = json_decode($body, true);
+
+            if (is_null($data) || !isset($data['estado']) || !in_array($data['estado'], [0, 1])) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Datos incorrectos en la solicitud'
+                ]);
+                return;
+            }
+
+            $estado = $data['estado'];
+
+            if ($this->Cliente->patchEstado($id, $estado)) {
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'Estado de la encuesta actualizado exitosamente'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al actualizar el estado de la encuesta'
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Método no permitido'
+            ]);
         }
     }
 }
