@@ -6,7 +6,7 @@
 	www.app.com/controller/metodo/variables
 	*/
 	class Core {
-		protected $controladorActual = 'Login';
+		protected $controladorActual = 'home';
 		protected $metodoActual = 'index';
 		protected $parametros = [];
 

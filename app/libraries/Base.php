@@ -92,4 +92,5 @@ class Base
 		$this->execute();
 		return $this->stmt->fetch(PDO::FETCH_ASSOC);
 	}
+	
 }
