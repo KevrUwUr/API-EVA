@@ -5,6 +5,7 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 // Se declara la clase Home que extiende de Controlador
 class UserController extends Controlador
 {
+    private $User;
     // Constructor de la clase
     public function __construct()
     {
@@ -16,6 +17,7 @@ class UserController extends Controlador
     {
         $listar = $this->User->list();
         echo json_encode($listar);
+        echo (json_encode($this->User->getId()));
     }
 
     public function UsersActive()
@@ -42,7 +44,6 @@ class UserController extends Controlador
         echo json_encode($listar);
     }
 
-    // Método para insertar un usuario
     public function postUser()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -61,6 +62,7 @@ class UserController extends Controlador
                 return;
             }
 
+            // Verificar si todos los campos requeridos están presentes
             if (
                 !isset($data['lastname'])
                 || !isset($data['firstname'])
@@ -92,12 +94,13 @@ class UserController extends Controlador
                 'last_visit_date' => trim($data['last_visit_date']),
             ];
 
-
             // Llama al modelo para realizar la inserción del usuario
             if ($this->User->create($datos)) {
+                $idCreation = $this->User->getId(); // Obtener el ID del usuario recién creado
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Usuario creado exitosamente'
+                    'message' => 'Usuario creado exitosamente',
+                    'id' => $idCreation->id // Ajustar el acceso al ID según lo que retorne la función registro
                 ]);
             } else {
                 echo json_encode([
@@ -107,6 +110,7 @@ class UserController extends Controlador
             }
         }
     }
+
 
     public function putUser($id)
     {
@@ -185,7 +189,7 @@ class UserController extends Controlador
             $body = file_get_contents('php://input');
             $data = json_decode($body, true);
 
-            if (is_null($data) || !isset($data['estado']) || !in_array($data['estado'], [0, 1])) {
+            if (is_null($data) || !isset($data['state']) || !in_array($data['state'], [0, 1])) {
                 echo json_encode([
                     'status' => false,
                     'message' => 'Datos incorrectos en la solicitud'
@@ -193,17 +197,17 @@ class UserController extends Controlador
                 return;
             }
 
-            $estado = $data['estado'];
+            $state = $data['state'];
 
-            if ($this->User->patchEstado($id, $estado)) {
+            if ($this->User->patchstate($id, $state)) {
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Estado del usuario actualizado exitosamente'
+                    'message' => 'state del usuario actualizado exitosamente'
                 ]);
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al actualizar el estado del usuario'
+                    'message' => 'Error al actualizar el state del usuario'
                 ]);
             }
         } else {

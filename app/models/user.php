@@ -23,7 +23,7 @@ class User
     public function listActive()
     {
         // Se ejecuta una consulta SQL para obtener la información de los clientes activos
-        $this->db->query("SELECT * FROM users WHERE estado = 1 ");
+        $this->db->query("SELECT * FROM users WHERE state = 1 ");
         // Retorna el resultado como un array asociativo
         return $this->db->registros();
     }
@@ -31,7 +31,7 @@ class User
     public function listInactive()
     {
         // Se ejecuta una consulta SQL para obtener la información de los clientes inactivos
-        $this->db->query("SELECT * FROM users WHERE estado = 0 ");
+        $this->db->query("SELECT * FROM users WHERE state = 0 ");
         // Retorna el resultado como un array asociativo
         return $this->db->registros();
     }
@@ -51,11 +51,18 @@ class User
         $this->db->bind(':id', $id);
         return $this->db->registros();
     }
+    
+    public function getId()
+    {
+        // Se ejecuta una consulta SQL para obtener el último ID insertado en la tabla users
+        $this->db->query("SELECT id, type FROM users ORDER BY id DESC LIMIT 1");
+        return $this->db->registro();
+    }
 
     public function create($datos)
     {
         // Se ejecuta una consulta SQL para insertar un nuevo cliente
-        $this->db->query('INSERT INTO users (lastname, firstname, middlename, email, password, type, language, registration_date, last_visit_date, estado) 
+        $this->db->query('INSERT INTO users (lastname, firstname, middlename, email, password, type, language, registration_date, last_visit_date, state) 
             VALUES (:lastname, :firstname, :middlename, :email, :password, :type, :language, :registration_date, :last_visit_date, 1)');
 
         // Asignar valores a los parámetros
@@ -94,12 +101,12 @@ class User
         return $this->db->execute();
     }
 
-    public function patchEstado($id, $estado)
+    public function patchstate($id, $state)
     {
-        // Prepara la consulta SQL para actualizar el estado del usuario
-        $this->db->query('UPDATE users SET estado = :estado WHERE id = :id');
+        // Prepara la consulta SQL para actualizar el state del usuario
+        $this->db->query('UPDATE users SET state = :state WHERE id = :id');
         $this->db->bind(':id', $id);
-        $this->db->bind(':estado', $estado);
+        $this->db->bind(':state', $state);
         return $this->db->execute();
     }
 }

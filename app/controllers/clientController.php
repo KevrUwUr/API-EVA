@@ -67,7 +67,7 @@ class clientController extends Controlador
             $datos = [
                 'client' => trim($data['cliente']),
                 'logo' => trim($data['logo']),
-                'estado' => trim($data['estado']),
+                'state' => trim($data['state']),
             ];
 
             // echo json_encode(['Datos de la peticion' => $datos]);
@@ -117,7 +117,7 @@ class clientController extends Controlador
                 'id' => $id,
                 'client' => trim($data['cliente']),
                 'logo' => trim($data['logo']),
-                'estado' => trim($data['estado']),
+                'state' => trim($data['state']),
             ];
 
             // Llama al modelo para realizar la actualización del cliente
@@ -141,7 +141,7 @@ class clientController extends Controlador
             $body = file_get_contents('php://input');
             $data = json_decode($body, true);
 
-            if (is_null($data) || !isset($data['estado']) || !in_array($data['estado'], [0, 1])) {
+            if (is_null($data) || !isset($data['state']) || !in_array($data['state'], [0, 1])) {
                 echo json_encode([
                     'status' => false,
                     'message' => 'Datos incorrectos en la solicitud'
@@ -149,17 +149,17 @@ class clientController extends Controlador
                 return;
             }
 
-            $estado = $data['estado'];
+            $state = $data['state'];
 
-            if ($this->Cliente->patchEstado($id, $estado)) {
+            if ($this->Cliente->patchstate($id, $state)) {
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Estado de la encuesta actualizado exitosamente'
+                    'message' => 'state de la encuesta actualizado exitosamente'
                 ]);
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al actualizar el estado de la encuesta'
+                    'message' => 'Error al actualizar el state de la encuesta'
                 ]);
             }
         } else {

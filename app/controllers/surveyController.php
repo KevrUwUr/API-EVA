@@ -194,7 +194,7 @@ class SurveyController extends Controlador
             $body = file_get_contents('php://input');
             $data = json_decode($body, true);
 
-            if (is_null($data) || !isset($data['estado']) || !in_array($data['estado'], [0, 1])) {
+            if (is_null($data) || !isset($data['state']) || !in_array($data['state'], [0, 1])) {
                 echo json_encode([
                     'status' => false,
                     'message' => 'Datos incorrectos en la solicitud'
@@ -202,17 +202,17 @@ class SurveyController extends Controlador
                 return;
             }
 
-            $estado = $data['estado'];
+            $state = $data['state'];
 
-            if ($this->Survey->patchEstado($id, $estado)) {
+            if ($this->Survey->patchstate($id, $state)) {
                 echo json_encode([
                     'status' => true,
-                    'message' => 'Estado de la encuesta actualizado exitosamente'
+                    'message' => 'state de la encuesta actualizado exitosamente'
                 ]);
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al actualizar el estado de la encuesta'
+                    'message' => 'Error al actualizar el state de la encuesta'
                 ]);
             }
         } else {

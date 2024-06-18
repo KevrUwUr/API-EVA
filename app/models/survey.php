@@ -23,7 +23,7 @@ class Survey
     public function listActive()
     {
         // Se ejecuta una consulta SQL para obtener la información de los clientes
-        $this->db->query("SELECT * FROM survey_set where estado = 1");
+        $this->db->query("SELECT * FROM survey_set where state = 1");
         // Retorna el resultado como un array asociativo
         return $this->db->registros();
     }
@@ -31,7 +31,7 @@ class Survey
     public function listInactive()
     {
         // Se ejecuta una consulta SQL para obtener la información de los clientes
-        $this->db->query("SELECT * FROM survey_set where estado = 0");
+        $this->db->query("SELECT * FROM survey_set where state = 0");
         // Retorna el resultado como un array asociativo
         return $this->db->registros();
     }
@@ -80,7 +80,7 @@ class Survey
 
             if ($result['count'] > 0) {
                 // idClient existe, proceder con la inserción
-                $this->db->query('INSERT INTO survey_set (title, start_date, end_date, description, link, type, idClient, estado)
+                $this->db->query('INSERT INTO survey_set (title, start_date, end_date, description, link, type, idClient, state)
                 VALUES (:title, :start_date, :end_date, :description, :link, :type, :idClient, 1)');
 
                 // Asignar valores a los parámetros
@@ -124,7 +124,7 @@ class Survey
     {
         try {
             // Prepara la consulta SQL para actualizar un cliente
-            $this->db->query('UPDATE survey_set SET title=:title, start_date=:start_date, end_date=:end_date, description=:description, link=:link, type=:type, idClient=:idClient, estado = 1 WHERE id = :id');
+            $this->db->query('UPDATE survey_set SET title=:title, start_date=:start_date, end_date=:end_date, description=:description, link=:link, type=:type, idClient=:idClient, state = 1 WHERE id = :id');
 
             // Asigna valores a los parámetros de la consulta
             $this->db->bind(':id', $id);
@@ -144,13 +144,13 @@ class Survey
     }
 
 
-    public function patchEstado($id, $estado)
+    public function patchstate($id, $state)
     {
         try {
-            // Prepara la consulta SQL para actualizar el estado del usuario
-            $this->db->query('UPDATE survey_set SET estado = :estado WHERE id = :id');
+            // Prepara la consulta SQL para actualizar el state del usuario
+            $this->db->query('UPDATE survey_set SET state = :state WHERE id = :id');
             $this->db->bind(':id', $id);
-            $this->db->bind(':estado', $estado);
+            $this->db->bind(':state', $state);
             return $this->db->execute();
         } catch (PDOException $e) {
             return false; // Devuelve false en caso de error

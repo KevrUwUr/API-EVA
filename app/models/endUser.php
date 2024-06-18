@@ -23,7 +23,7 @@ class EndUser
     public function listActive()
     {
         // Se ejecuta una consulta SQL para obtener la información de los clientes activos
-        $this->db->query("SELECT * FROM end_users WHERE estado = 1 ");
+        $this->db->query("SELECT * FROM end_users WHERE state = 1 ");
         // Retorna el resultado como un array asociativo
         return $this->db->registros();
     }
@@ -31,7 +31,7 @@ class EndUser
     public function listInactive()
     {
         // Se ejecuta una consulta SQL para obtener la información de los clientes inactivos
-        $this->db->query("SELECT * FROM end_users WHERE estado = 0 ");
+        $this->db->query("SELECT * FROM end_users WHERE state = 0 ");
         // Retorna el resultado como un array asociativo
         return $this->db->registros();
     }
@@ -76,12 +76,12 @@ class EndUser
         return $this->db->execute();
     }
 
-    public function patchEstado($id, $estado)
+    public function patchstate($id, $state)
     {
-        // Prepara la consulta SQL para actualizar el estado del usuario
-        $this->db->query('UPDATE end_users SET estado = :estado WHERE id = :id');
+        // Prepara la consulta SQL para actualizar el state del usuario
+        $this->db->query('UPDATE end_users SET state = :state WHERE id = :id');
         $this->db->bind(':id', $id);
-        $this->db->bind(':estado', $estado);
+        $this->db->bind(':state', $state);
         return $this->db->execute();
     }
 }

@@ -57,14 +57,14 @@ CREATE TABLE `tbl_grupo` (
   `tbl_grupo_DESCRICION` varchar(50) DEFAULT NULL,
   `tbl_grupo_MANAGER` varchar(50) DEFAULT NULL,
   `tbl_grupo_CREAR_FECHA` varchar(50) DEFAULT NULL,
-  `tbl_grupo_ESTADO` tinyint(1) DEFAULT NULL
+  `tbl_grupo_state` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `tbl_grupo`
 --
 
-INSERT INTO `tbl_grupo` (`tbl_grupo_ID`, `tbl_grupo_AREA`, `tbl_grupo_NOMBRES`, `tbl_grupo_DESCRICION`, `tbl_grupo_MANAGER`, `tbl_grupo_CREAR_FECHA`, `tbl_grupo_ESTADO`) VALUES
+INSERT INTO `tbl_grupo` (`tbl_grupo_ID`, `tbl_grupo_AREA`, `tbl_grupo_NOMBRES`, `tbl_grupo_DESCRICION`, `tbl_grupo_MANAGER`, `tbl_grupo_CREAR_FECHA`, `tbl_grupo_state`) VALUES
 (5, 'Desarrollo', 'Desarrollo', 'programadores con experiencia en multiple leguaje', 'Luis Garcia', '2023-10-13 12:18:46', 1);
 
 -- --------------------------------------------------------
@@ -82,7 +82,7 @@ CREATE TABLE `tbl_grupo_objectivo` (
   `tbl_grupo_objectivo_OBJETIVO_SEMANA` varchar(50) DEFAULT NULL,
   `tbl_grupo_objectivo_OBJETIVO_MESES` varchar(50) DEFAULT NULL,
   `tbl_grupo_objectivo_PROMEDIO` varchar(50) DEFAULT NULL,
-  `tbl_grupo_objectivo_ESTADO` tinyint(1) DEFAULT NULL,
+  `tbl_grupo_objectivo_state` tinyint(1) DEFAULT NULL,
   `tbl_grupo_ID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -101,7 +101,7 @@ CREATE TABLE `tbl_grupo_objectivo_usuario` (
   `tbl_grupo_objectivo_OBJETIVO_SEMANA` varchar(50) DEFAULT NULL,
   `tbl_grupo_objectivo_OBJETIVO_MESES` varchar(50) DEFAULT NULL,
   `tbl_grupo_objectivo_PROMEDIO` varchar(50) DEFAULT NULL,
-  `tbl_grupo_objectivo_ESTADO` tinyint(1) DEFAULT NULL,
+  `tbl_grupo_objectivo_state` tinyint(1) DEFAULT NULL,
   `tbl_persona_USUARIO_RED` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -109,7 +109,7 @@ CREATE TABLE `tbl_grupo_objectivo_usuario` (
 -- Volcado de datos para la tabla `tbl_grupo_objectivo_usuario`
 --
 
-INSERT INTO `tbl_grupo_objectivo_usuario` (`tbl_grupo_objectivo_ID`, `tbl_grupo_objectivos_NOMBRES`, `tbl_grupo_objectivo_OBJETIVO`, `tbl_grupo_objectivo_METRICA`, `tbl_grupo_objectivo_PARAMETRO`, `tbl_grupo_objectivo_OBJETIVO_SEMANA`, `tbl_grupo_objectivo_OBJETIVO_MESES`, `tbl_grupo_objectivo_PROMEDIO`, `tbl_grupo_objectivo_ESTADO`, `tbl_persona_USUARIO_RED`) VALUES
+INSERT INTO `tbl_grupo_objectivo_usuario` (`tbl_grupo_objectivo_ID`, `tbl_grupo_objectivos_NOMBRES`, `tbl_grupo_objectivo_OBJETIVO`, `tbl_grupo_objectivo_METRICA`, `tbl_grupo_objectivo_PARAMETRO`, `tbl_grupo_objectivo_OBJETIVO_SEMANA`, `tbl_grupo_objectivo_OBJETIVO_MESES`, `tbl_grupo_objectivo_PROMEDIO`, `tbl_grupo_objectivo_state`, `tbl_persona_USUARIO_RED`) VALUES
 (1, 'eva', 'terminar el proyeyo', 'calida', 'Tiempo', '20', '50', '100', 1, 'padiernamazo.5');
 
 -- --------------------------------------------------------
@@ -147,14 +147,14 @@ CREATE TABLE `tbl_persona` (
   `tbl_persona_AFP` varchar(50) DEFAULT NULL,
   `tbl_persona_EQUIPO_COMPUESTO` varchar(50) DEFAULT NULL,
   `tbl_persona_OBSERVACIONES` varchar(50) DEFAULT NULL,
-  `tbl_persona_ESTADO` tinyint(1) DEFAULT 1
+  `tbl_persona_state` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `tbl_persona`
 --
 
-INSERT INTO `tbl_persona` (`tbl_persona_USUARIO_RED`, `tbl_persona_CARGO`, `tbl_persona_CENTRO_COSTO`, `tbl_persona_NOMBRE`, `tbl_persona_APELLIDO`, `tbl_persona_FECHA_NACIMIENTO`, `tbl_persona_NUM_DOCUMENTO`, `tbl_persona_TELEFONO`, `tbl_persona_CCMS_ID`, `tbl_persona_USUARIO_CCMS`, `tbl_persona_FECHA_INGRESO_TP`, `tbl_persona_FECHA_EGRESO_TP`, `tbl_persona_CORREO_CORPORATIVO`, `tbl_persona_ESTDO_CIVIL`, `tbl_persona_HIJO`, `tbl_persona_DIRECCION`, `tbl_persona_BARRIO`, `tbl_persona_CIUDAD`, `tbl_persona_NOMBRE_INSTITUCION`, `tbl_persona_CARRERA`, `tbl_persona_TIPO_CARRERA`, `tbl_persona_NIVEL_CARRERA`, `tbl_persona_CORREO_PERSONAL`, `tbl_persona_PLAZA`, `tbl_persona_GRUPO_SANGUINIO`, `tbl_persona_AFP`, `tbl_persona_EQUIPO_COMPUESTO`, `tbl_persona_OBSERVACIONES`, `tbl_persona_ESTADO`) VALUES
+INSERT INTO `tbl_persona` (`tbl_persona_USUARIO_RED`, `tbl_persona_CARGO`, `tbl_persona_CENTRO_COSTO`, `tbl_persona_NOMBRE`, `tbl_persona_APELLIDO`, `tbl_persona_FECHA_NACIMIENTO`, `tbl_persona_NUM_DOCUMENTO`, `tbl_persona_TELEFONO`, `tbl_persona_CCMS_ID`, `tbl_persona_USUARIO_CCMS`, `tbl_persona_FECHA_INGRESO_TP`, `tbl_persona_FECHA_EGRESO_TP`, `tbl_persona_CORREO_CORPORATIVO`, `tbl_persona_ESTDO_CIVIL`, `tbl_persona_HIJO`, `tbl_persona_DIRECCION`, `tbl_persona_BARRIO`, `tbl_persona_CIUDAD`, `tbl_persona_NOMBRE_INSTITUCION`, `tbl_persona_CARRERA`, `tbl_persona_TIPO_CARRERA`, `tbl_persona_NIVEL_CARRERA`, `tbl_persona_CORREO_PERSONAL`, `tbl_persona_PLAZA`, `tbl_persona_GRUPO_SANGUINIO`, `tbl_persona_AFP`, `tbl_persona_EQUIPO_COMPUESTO`, `tbl_persona_OBSERVACIONES`, `tbl_persona_state`) VALUES
 ('acevedohenao.9', NULL, NULL, 'Cindy Camila', 'Acevedo Henao', NULL, '1023522367', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1),
 ('admin@admin.com', 'Sin observaciones', 'Costo 123', 'Juan Andres', 'Peres Gutierez', '2023-09-23', '123456789', '', 'CCMS123', 'UsuarioCCMS123', '2023-09-23', '2023-09-23', 'juan.perez@empresa.com', 'Soltero', '2', '123 Calle Principal', '123 Calle Principal', 'Ciudad Principal', 'Universidad XYZ', 'Presencial', 'Presencial', NULL, 'juan.perez@gmail.com', 'Plaza 001', 'O+', 'AFP1', 'Equipo 1', 'Gerente', 1),
 ('Alvarezbenavides.7', NULL, NULL, 'Nestor Andres', 'Alvarez', NULL, '1110451197', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1),

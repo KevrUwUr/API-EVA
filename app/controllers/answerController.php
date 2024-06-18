@@ -41,7 +41,6 @@ class AnswerController extends Controlador
             }
 
             $results = [];
-            echo ("Datos:" . json_encode($data));
             foreach ($data as $datos) {
 
                 if (
@@ -97,7 +96,6 @@ class AnswerController extends Controlador
                 return;
             }
 
-            echo ("Datos: " . json_encode($data));
             if (
                 !isset($data['answer'])
                 || !isset($data['survey_id'])
