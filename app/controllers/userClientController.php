@@ -11,6 +11,12 @@ class UserClientController extends Controlador
     // Constructor de la clase
     public function __construct()
     {
+        $headers = getallheaders();
+        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
+            http_response_code(401); // Unauthorized
+            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
+            exit;
+        }
         // Se instancia el modelo User_Client
         $this->UserClient = $this->modelo("user_client");
     }

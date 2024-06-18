@@ -5,9 +5,17 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 // Se declara la clase Home que extiende de Controlador
 class EndUserController extends Controlador
 {
+    private $EndUser;
+
     // Constructor de la clase
     public function __construct()
     {
+        $headers = getallheaders();
+        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
+            http_response_code(401); // Unauthorized
+            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
+            exit;
+        }
         // Se instancia el modelo EndUser
         $this->EndUser = $this->modelo("endUser");
     }

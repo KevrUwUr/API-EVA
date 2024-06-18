@@ -1,5 +1,11 @@
 <?php
 
+require_once __DIR__ . '/../../vendor/autoload.php'; // Autoload de Composer
+
+use Firebase\JWT\JWT; // Importar Key para la decodificación
+use Firebase\JWT\Key; // Importar Key para la decodificación
+
+
 defined('BASEPATH') or exit('No se permite acceso directo');
 
 // Clase para conexion a la base de datos y ejecutar consultas, utilizando PDO
@@ -100,7 +106,7 @@ class Base
         $time = time();
         $token = array(
             "iat" => $time,
-            "exp" => $time + (60 * 5),
+            "exp" => $time + (60 * 5), // 5 minutos
             "data" => [
                 "id" => $id,
                 "email" => $email
@@ -108,5 +114,34 @@ class Base
         );
 
         return $token;
+    }
+
+    // Método para validar un token JWT
+    static public function tokenValidate($token)
+    {
+        $secretKey = "AquiVaLaKEYParaElProyectoDeEVA123456*/"; // Recomendado almacenar en archivo de configuración
+
+        try {
+            $decoded = JWT::decode($token, new Key($secretKey, 'HS256'));
+
+            // Crear una nueva instancia para ejecutar la consulta
+            $db = new Base;
+            $db->query("SELECT token_Exp FROM users WHERE accessToken = :accessToken");
+            $db->bind(':accessToken', $token);
+            $user = $db->single();
+
+            if ($user) {
+                $currentTime = time();
+                if ($user['token_Exp'] > $currentTime) {
+                    return true;
+                } else {
+                    return false; // Token expirado
+                }
+            } else {
+                return false; // Token no encontrado en la base de datos
+            }
+        } catch (Exception $e) {
+            return false; // Token no válido
+        }
     }
 }

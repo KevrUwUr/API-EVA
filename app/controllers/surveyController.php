@@ -5,9 +5,18 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 // Se declara la clase Home que extiende de Controlador
 class SurveyController extends Controlador
 {
+    private $Survey;
+
     // Constructor de la clase
     public function __construct()
     {
+        $headers = getallheaders();
+        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
+            http_response_code(401); // Unauthorized
+            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
+            exit;
+        }
+
         // Se instancia el modelo Survey
         $this->Survey = $this->modelo("survey");
     }
@@ -23,7 +32,7 @@ class SurveyController extends Controlador
         $listar = $this->Survey->listActive();
         echo json_encode($listar);
     }
-    
+
     public function SurveysInactive()
     {
         $listar = $this->Survey->listInactive();
@@ -40,7 +49,7 @@ class SurveyController extends Controlador
     {
         // Llamar al método del modelo para obtener las preguntas de la encuesta
         $questions = $this->Survey->listQuestionsxSurvey($id);
-        
+
         // Verificar si se produjo un error en la consulta
         if (isset($questions['error'])) {
             echo json_encode([
@@ -55,8 +64,8 @@ class SurveyController extends Controlador
             ]);
         }
     }
-    
-    
+
+
 
     // Método para insertar un usuario
     public function postSurvey()
