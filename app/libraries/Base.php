@@ -106,7 +106,7 @@ class Base
         $time = time();
         $token = array(
             "iat" => $time,
-            "exp" => $time + (60 * 5), // 5 minutos
+            "exp" => $time + (60 * 30), // 5 minutos
             "data" => [
                 "id" => $id,
                 "email" => $email

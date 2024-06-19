@@ -51,7 +51,7 @@ class User
         $this->db->bind(':id', $id);
         return $this->db->registros();
     }
-    
+
     public function getId()
     {
         // Se ejecuta una consulta SQL para obtener el último ID insertado en la tabla users
@@ -82,24 +82,30 @@ class User
 
     public function update($datos, $id)
     {
-        // Prepara la consulta SQL para actualizar un cliente
-        $this->db->query('UPDATE users SET lastname=:lastname, firstname=:firstname, middlename=:middlename, email=:email, password=:password, type=:type, language=:language, registration_date=:registration_date, last_visit_date=:last_visit_date WHERE id = :id');
+        // Iniciar la consulta SQL
+        $sql = 'UPDATE users SET ';
 
-        // Asigna valores a los parámetros de la consulta
+        // Construir los fragmentos de la consulta
+        $setClause = [];
+        foreach ($datos as $key => $value) {
+            $setClause[] = "$key = :$key";
+        }
+        $sql .= implode(', ', $setClause);
+        $sql .= ' WHERE id = :id';
+
+        // Preparar la consulta SQL
+        $this->db->query($sql);
+
+        // Asignar valores a los parámetros de la consulta
+        foreach ($datos as $key => $value) {
+            $this->db->bind(":$key", $value);
+        }
         $this->db->bind(':id', $id);
-        $this->db->bind(':lastname', $datos['lastname']);
-        $this->db->bind(':firstname', $datos['firstname']);
-        $this->db->bind(':middlename', $datos['middlename']);
-        $this->db->bind(':email', $datos['email']);
-        $this->db->bind(':password', $datos['password']);
-        $this->db->bind(':type', $datos['type']);
-        $this->db->bind(':language', $datos['language']);
-        $this->db->bind(':registration_date', $datos['registration_date']);
-        $this->db->bind(':last_visit_date', $datos['last_visit_date']);
 
-        // Ejecuta la consulta y retorna true si tiene éxito, false si falla
+        // Ejecutar la consulta y retornar true si tiene éxito, false si falla
         return $this->db->execute();
     }
+
 
     public function patchstate($id, $state)
     {

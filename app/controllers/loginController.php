@@ -45,7 +45,12 @@ class LoginController extends Controlador
             $datos = [
               'accessToken' => $jwt,
               'token_Exp' => $token['exp'],
-              'nombre' => $resulset->lastname . " " . $resulset->firstname . " " . $resulset->middlename,
+              'id' => $resulset->id,
+            ];
+
+            $userLogin = [
+              'accessToken' => $jwt,
+              'id' => $resulset->id,
               'type' => $resulset->type
             ];
 
@@ -53,7 +58,7 @@ class LoginController extends Controlador
               echo json_encode([
                 'status' => true,
                 'message' => 'Token actualizado exitosamente',
-                'userLogin' => $datos // Devolver los datos del usuario junto con el mensaje
+                'userLogin' => $userLogin // Devolver los datos del usuario junto con el mensaje
               ]);
             } else {
               echo json_encode([

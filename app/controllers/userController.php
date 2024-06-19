@@ -94,43 +94,38 @@ class UserController extends Controlador
         }
     }
 
-
-
     public function putUser($id)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $body = file_get_contents('php://input');
             $data = json_decode($body, true);
-
+    
             if (is_null($data)) {
                 echo json_encode(['status' => false, 'message' => 'Error al decodificar JSON']);
                 return;
             }
-
-            $requiredFields = ['lastname', 'firstname', 'middlename', 'email', 'type', 'language', 'registration_date', 'last_visit_date'];
-            foreach ($requiredFields as $field) {
-                if (!isset($data[$field])) {
-                    echo json_encode(['status' => false, 'message' => "El campo $field es obligatorio"]);
-                    return;
-                }
-            }
-
-            $datos = [
-                'lastname' => trim($data['lastname']),
-                'firstname' => trim($data['firstname']),
-                'middlename' => trim($data['middlename']),
-                'email' => trim($data['email']),
-                'password' => isset($data['password']) ? password_hash(trim($data['password']), PASSWORD_DEFAULT) : '',
-                'type' => trim($data['type']),
-                'language' => trim($data['language']),
-                'registration_date' => trim($data['registration_date']),
-                'last_visit_date' => trim($data['last_visit_date']),
-            ];
-
+    
+            $datos = [];
+            if (isset($data['lastname'])) $datos['lastname'] = trim($data['lastname']);
+            if (isset($data['firstname'])) $datos['firstname'] = trim($data['firstname']);
+            if (isset($data['middlename'])) $datos['middlename'] = trim($data['middlename']);
+            if (isset($data['email'])) $datos['email'] = trim($data['email']);
+            if (isset($data['password'])) $datos['password'] = password_hash(trim($data['password']), PASSWORD_DEFAULT);
+            if (isset($data['type'])) $datos['type'] = trim($data['type']);
+            if (isset($data['language'])) $datos['language'] = trim($data['language']);
+            if (isset($data['registration_date'])) $datos['registration_date'] = trim($data['registration_date']);
+            if (isset($data['last_visit_date'])) $datos['last_visit_date'] = trim($data['last_visit_date']);
+    
+            // Filtrar los campos que no estén vacíos
             $datos = array_filter($datos, function ($value) {
                 return $value !== '';
             });
-
+    
+            if (empty($datos)) {
+                echo json_encode(['status' => false, 'message' => 'No se proporcionaron campos para actualizar']);
+                return;
+            }
+    
             if ($this->User->update($datos, $id)) {
                 echo json_encode(['status' => true, 'message' => 'Usuario actualizado exitosamente']);
             } else {
@@ -138,7 +133,7 @@ class UserController extends Controlador
             }
         }
     }
-
+    
 
     public function patchUser($id)
     {

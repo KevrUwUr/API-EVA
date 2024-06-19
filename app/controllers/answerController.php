@@ -49,6 +49,7 @@ class AnswerController extends Controlador
 
             $results = [];
             foreach ($data as $datos) {
+                echo (json_encode($datos));
 
                 if (
                     !isset($datos['answer'])
