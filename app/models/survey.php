@@ -63,12 +63,10 @@ class Survey
             // Capturar y manejar cualquier excepción de la base de datos
             return [
                 'error' => true,
-                'message' => 'Error al obtener las preguntas de la encuesta: ' . $e->getMessage()
+                'message' => 'Error al obtener las encuestas de la encuesta: ' . $e->getMessage()
             ];
         }
     }
-
-
 
     public function create($datos)
     {
@@ -154,6 +152,45 @@ class Survey
             return $this->db->execute();
         } catch (PDOException $e) {
             return false; // Devuelve false en caso de error
+        }
+    }
+
+    public function delete($id)
+    {
+        try {
+            // Verificar si la encuesta existe antes de intentar eliminarla
+            $question = $this->listByID($id); // Método que deberías tener en tu modelo para buscar por ID
+
+            if (!$question) {
+                return [
+                    'status' => false,
+                    'message' => 'La encuesta con ID ' . $id . ' no existe'
+                ];
+            }
+
+            // Prepara la consulta SQL para eliminar una encuesta
+            $this->db->query('DELETE FROM survey_set WHERE id = :id');
+
+            // Asigna valores a los parámetros de la consulta
+            $this->db->bind(':id', $id);
+
+            // Ejecuta la consulta
+            if ($this->db->execute()) {
+                return [
+                    'status' => true,
+                    'message' => 'encuesta eliminada exitosamente'
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => 'Error al eliminar la encuesta'
+                ];
+            }
+        } catch (PDOException $e) {
+            return [
+                'status' => false,
+                'message' => 'Error de base de datos: ' . $e->getMessage()
+            ];
         }
     }
 }

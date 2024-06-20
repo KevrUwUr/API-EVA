@@ -51,6 +51,7 @@ class LoginController extends Controlador
             $userLogin = [
               'accessToken' => $jwt,
               'id' => $resulset->id,
+              'state' => $resulset->state,
               'type' => $resulset->type
             ];
 

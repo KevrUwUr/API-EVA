@@ -11,7 +11,7 @@ class LoginModel
 
     public function Login($email)
     {
-        $this->db->query("SELECT id, firstname, middlename, lastname, email, type, accessToken, password FROM users WHERE email = :email");
+        $this->db->query("SELECT id, firstname, middlename, lastname, email, type, accessToken, password, state FROM users WHERE email = :email");
         $this->db->bind(':email', $email);
         return $this->db->registro(); // Devuelve un solo registro como objeto PDO
     }

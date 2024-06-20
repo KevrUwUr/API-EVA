@@ -47,7 +47,7 @@ class Cliente
     public function create($datos)
     {
         // Se ejecuta una consulta SQL para insertar un nuevo cliente
-        $this->db->query('INSERT INTO clients(client, logo, state) VALUES (:cliente, :logo 1)');
+        $this->db->query('INSERT INTO clients(client, logo, state) VALUES (:cliente, :logo, 1)');
         // Asignar valores a los parámetros
         $this->db->bind(':cliente', $datos['client']);
         $this->db->bind(':logo', $datos['logo']);

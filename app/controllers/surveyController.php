@@ -6,19 +6,19 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 class SurveyController extends Controlador
 {
     private $Survey;
+    private $authMiddleware;
 
     // Constructor de la clase
     public function __construct()
     {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
-            http_response_code(401); // Unauthorized
-            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
-            exit;
-        }
+        // Crear instancia del middleware de autenticación
+        $this->authMiddleware = new AuthMiddleware();
 
-        // Se instancia el modelo Survey
-        $this->Survey = $this->modelo("survey");
+        // Ejecutar el middleware de autenticación
+        $this->authMiddleware->handle($_REQUEST, function ($request) {
+            // Se instancia el modelo Survey
+            $this->Survey = $this->modelo("survey");
+        });
     }
 
     public function Surveys()
@@ -47,7 +47,7 @@ class SurveyController extends Controlador
 
     public function QuestionxSurvey($id)
     {
-        // Llamar al método del modelo para obtener las preguntas de la encuesta
+        // Llamar al método del modelo para obtener las encuestas de la encuesta
         $questions = $this->Survey->listQuestionsxSurvey($id);
 
         // Verificar si se produjo un error en la consulta
@@ -70,37 +70,11 @@ class SurveyController extends Controlador
     // Método para insertar un usuario
     public function postSurvey()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
+        // Usar middleware JsonValidationMiddleware
+        $jsonValidationMiddleware = new JsonValidationMiddleware(['title', 'start_date', 'end_date', 'description', 'link', 'type', 'idClient']);
 
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
-
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
-
-            if (
-                !isset($data['title'])
-                || !isset($data['start_date'])
-                || !isset($data['end_date'])
-                || !isset($data['description'])
-                || !isset($data['link'])
-                || !isset($data['type'])
-                || !isset($data['idClient'])
-            ) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ]);
-                return;
-            }
+        // Manejar la validación y procesamiento del usuario
+        $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
 
             // Asignar los valores del array $data al array $datos
             $datos = [
@@ -115,7 +89,7 @@ class SurveyController extends Controlador
 
             // Llama al modelo para realizar la inserción del usuario
             $result = $this->Survey->create($datos);
-            if ($result === true) {
+            if ($result == true) {
                 echo json_encode([
                     'status' => true,
                     'message' => 'Encuesta creada exitosamente'
@@ -124,10 +98,10 @@ class SurveyController extends Controlador
                 // Suponiendo que $result contiene el mensaje de error de la base de datos en caso de falla
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al crear la encuesta: ' . $result
+                    'message' => 'Error al crear la encuesta: ' . json_encode($result)
                 ]);
             }
-        }
+        });
     }
 
     public function putSurvey($id)
@@ -228,6 +202,31 @@ class SurveyController extends Controlador
             echo json_encode([
                 'status' => false,
                 'message' => 'Método no permitido'
+            ]);
+        }
+    }
+
+    public function DeleteSurvey($id){
+        if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+            // Llama al modelo para realizar la eliminación de la encuesta
+            $result = $this->Survey->delete($id);
+
+            // Verificar el resultado de la eliminación
+            if ($result['status']) {
+                echo json_encode([
+                    'status' => true,
+                    'message' => 'encuesta eliminada exitosamente'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => false,
+                    'message' => 'Error al eliminar la encuesta: ' . $result['message']
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Método de solicitud no permitido'
             ]);
         }
     }

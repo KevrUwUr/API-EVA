@@ -6,18 +6,19 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 class EndUserController extends Controlador
 {
     private $EndUser;
+    private $authMiddleware;
 
     // Constructor de la clase
     public function __construct()
     {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
-            http_response_code(401); // Unauthorized
-            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
-            exit;
-        }
-        // Se instancia el modelo EndUser
-        $this->EndUser = $this->modelo("endUser");
+        // Crear instancia del middleware de autenticación
+        $this->authMiddleware = new AuthMiddleware();
+
+        // Ejecutar el middleware de autenticación
+        $this->authMiddleware->handle($_REQUEST, function ($request) {
+            // Se instancia el modelo EndUser
+            $this->EndUser = $this->modelo("endUser");
+        });
     }
 
     public function EndUsers()
@@ -47,34 +48,11 @@ class EndUserController extends Controlador
     // Método para insertar un usuario
     public function postEndUser()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
+        // Usar middleware JsonValidationMiddleware
+        $jsonValidationMiddleware = new JsonValidationMiddleware(['lastname', 'firstname', 'middlename', 'email']);
 
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
-
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
-
-            if (
-                !isset($data['lastname'])
-                || !isset($data['firstname'])
-                || !isset($data['middlename'])
-                || !isset($data['email'])
-            ) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ]);
-                return;
-            }
+        // Manejar la validación y procesamiento del usuario
+        $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
 
             // Asignar los valores del array $data al array $datos
             $datos = [
@@ -86,7 +64,8 @@ class EndUserController extends Controlador
 
 
             // Llama al modelo para realizar la inserción del usuario
-            if ($this->EndUser->create($datos)) {
+            $result = $this->EndUser->create($datos);
+            if ($result == true) {
                 echo json_encode([
                     'status' => true,
                     'message' => 'EndUser creado exitosamente'
@@ -94,10 +73,10 @@ class EndUserController extends Controlador
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al crear endUser'
+                    'message' => 'Error al crear endUser'. json_encode($result)
                 ]);
             }
-        }
+        });
     }
 
     public function putEndUser($id)

@@ -6,18 +6,19 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 class clientController extends Controlador
 {
     private $Cliente;
+    private $authMiddleware;
 
     // Constructor de la clase
     public function __construct()
     {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
-            http_response_code(401); // Unauthorized
-            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
-            exit;
-        }
-        // Se instancia el modelo cliente
-        $this->Cliente = $this->modelo("cliente");
+        // Crear instancia del middleware de autenticación
+        $this->authMiddleware = new AuthMiddleware();
+
+        // Ejecutar el middleware de autenticación
+        $this->authMiddleware->handle($_REQUEST, function ($request) {
+            // Se instancia el modelo cliente
+            $this->Cliente = $this->modelo("cliente");
+        });
     }
 
     public function Clients()
@@ -31,7 +32,7 @@ class clientController extends Controlador
         $listar = $this->Cliente->listActive();
         echo json_encode($listar);
     }
-    
+
     public function ClientsInactive()
     {
         $listar = $this->Cliente->listInactive();
@@ -47,35 +48,15 @@ class clientController extends Controlador
     // Método para insertar un cliente
     public function postClient()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
+        // Usar middleware JsonValidationMiddleware
+        $jsonValidationMiddleware = new JsonValidationMiddleware(['cliente', 'logo']);
 
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
-
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
-
-            // Verificar si las claves existen en el array
-            if (!isset($data['cliente']) || !isset($data['logo'])) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ]);
-                return;
-            }
+        // Manejar la validación y procesamiento del usuario
+        $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
 
             $datos = [
                 'client' => trim($data['cliente']),
                 'logo' => trim($data['logo']),
-                'state' => trim($data['state']),
             ];
 
             // echo json_encode(['Datos de la peticion' => $datos]);
@@ -92,7 +73,7 @@ class clientController extends Controlador
                     'message' => 'Error al crear el cliente'
                 ]);
             }
-        }
+        });
     }
 
     public function putClient($id)

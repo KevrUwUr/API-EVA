@@ -49,17 +49,27 @@ class EndUser_Client
 
                 // Ejecutar la consulta y retornar true si tiene éxito
                 if ($this->db->execute()) {
-                    return true;
+                    return [
+                        'status' => true,
+                        'message' => 'Asociación endUser-client creada exitosamente'
+                    ];
                 } else {
-                    return 'Error al insertar la asociación endUser-cliente';
+                    return [
+                        'status' => false,
+                        'message' => 'Error al insertar la asociación endUser-client'
+                    ];
                 }
             } else {
-                // idClient o idEndUser no existe, retornar mensaje de error
-                return 'idClient o idEndUser no encontrado';
+                return [
+                    'status' => false,
+                    'message' => 'idClient o idEndUser no encontrado'
+                ];
             }
         } catch (PDOException $e) {
-            // Capturar excepciones de base de datos
-            return 'Error de base de datos: ' . $e->getMessage();
+            return [
+                'status' => false,
+                'message' => 'Error de base de datos: ' . $e->getMessage()
+            ];
         }
     }
 

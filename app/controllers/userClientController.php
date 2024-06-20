@@ -1,146 +1,99 @@
 <?php
-// Se define que no se permite acceso directo al archivo
 defined('BASEPATH') or exit('No se permite acceso directo');
 
-// Se declara la clase UserClientController que extiende de Controlador
 class UserClientController extends Controlador
 {
-    // Propiedad para almacenar la instancia del modelo User_Client
-    private $UserClient;
+  private $UserClient;
+  private $authMiddleware;
 
-    // Constructor de la clase
-    public function __construct()
-    {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
-            http_response_code(401); // Unauthorized
-            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
-            exit;
+  public function __construct()
+  {
+    $this->authMiddleware = new AuthMiddleware();
+
+    $this->authMiddleware->handle($_REQUEST, function ($request) {
+      $this->UserClient = $this->modelo("user_client");
+    });
+  }
+
+  public function Usersclients()
+  {
+    $listar = $this->UserClient->list();
+    echo json_encode($listar);
+  }
+
+  public function UserClientByID($id)
+  {
+    $listar = $this->UserClient->listByID($id);
+    echo json_encode($listar);
+  }
+
+  public function postUserClient()
+  {
+    $jsonValidationMiddleware = new JsonValidationMiddleware(['idUser', 'idClient']);
+
+    $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
+      $results = [];
+      foreach ($data as $datos) {
+        $result = $this->UserClient->create($datos);
+        if ($result['status'] === true) {
+          $results[] = [
+            'idUser' => $datos['idUser'],
+            'idClient' => $datos['idClient'],
+            'status' => true,
+            'message' => $result['message']
+          ];
+        } else {
+          $results[] = [
+            'idUser' => $datos['idUser'],
+            'idClient' => $datos['idClient'],
+            'status' => false,
+            'message' => 'Error al crear la asociación cliente-usuario: ' . $result['message']
+          ];
         }
-        // Se instancia el modelo User_Client
-        $this->UserClient = $this->modelo("user_client");
+      }
+      echo json_encode($results);
+    });
+  }
+
+  public function putUserClient($id)
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+      $body = file_get_contents('php://input');
+      $data = json_decode($body, true);
+
+      if (is_null($data)) {
+        echo json_encode([
+          'status' => false,
+          'message' => 'Error al decodificar JSON'
+        ]);
+        return;
+      }
+
+      if (!isset($data['idUser']) || !isset($data['idClient'])) {
+        echo json_encode([
+          'status' => false,
+          'message' => 'Datos incompletos en la solicitud'
+        ]);
+        return;
+      }
+
+      $datos = [
+        'idUser' => trim($data['idUser']),
+        'idClient' => trim($data['idClient']),
+      ];
+
+      $result = $this->UserClient->update($datos, $id);
+      if ($result['status'] === true) {
+        echo json_encode([
+          'status' => true,
+          'message' => $result['message']
+        ]);
+      } else {
+        echo json_encode([
+          'status' => false,
+          'message' => 'Error al actualizar la asociación cliente-usuario: ' . $result['message']
+        ]);
+      }
     }
-
-    // Método para obtener todos los registros de user_clients
-    public function Usersclients()
-    {
-        $listar = $this->UserClient->list();
-        echo json_encode($listar);
-    }
-
-    // Método para obtener un registro de user_clients por ID
-    public function UserClientByID($id)
-    {
-        $listar = $this->UserClient->listByID($id);
-        echo json_encode($listar);
-    }
-
-    public function postUserClient()
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Leer el cuerpo de la solicitud
-        $body = file_get_contents('php://input');
-
-        // Decodificar el JSON recibido en un array asociativo
-        $data = json_decode($body, true);
-
-        // Verificar si json_decode tuvo éxito
-        if (is_null($data)) {
-            echo json_encode([
-                'status' => false,
-                'message' => 'Error al decodificar JSON'
-            ]);
-            return;
-        }
-
-        // Iterar sobre cada elemento del array y realizar la inserción
-        $results = [];
-        foreach ($data as $datos) {
-            // Verificar si los datos requeridos están presentes en la solicitud
-            if (!isset($datos['idUser']) || !isset($datos['idClient'])) {
-                $results[] = [
-                    'idUser' => $datos['idUser'] ?? null,
-                    'idClient' => $datos['idClient'] ?? null,
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ];
-                continue;
-            }
-
-            // Llama al modelo para realizar la inserción del usuario-cliente
-            $result = $this->UserClient->create($datos);
-            if ($result === true) {
-                $results[] = [
-                    'idUser' => $datos['idUser'],
-                    'idClient' => $datos['idClient'],
-                    'status' => true,
-                    'message' => 'Asociación cliente-usuario creada exitosamente'
-                ];
-            } else {
-                // Suponiendo que $result contiene el mensaje de error de la base de datos en caso de falla
-                $results[] = [
-                    'idUser' => $datos['idUser'],
-                    'idClient' => $datos['idClient'],
-                    'status' => false,
-                    'message' => 'Error al crear la asociación cliente-usuario: ' . $result
-                ];
-            }
-        }
-
-        // Retornar los resultados como un array de JSON
-        echo json_encode($results);
-    }
+  }
 }
-    
-    // Método para actualizar una asociación usuario-cliente por ID
-    public function putUserClient($id)
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
-    
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
-    
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
-    
-            // Verificar si los datos requeridos están presentes en la solicitud
-            if (!isset($data['idUser']) || !isset($data['idClient'])) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ]);
-                return;
-            }
-    
-            // Asignar los valores del array $data al array $datos
-            $datos = [
-                'idUser' => trim($data['idUser']),
-                'idClient' => trim($data['idClient']),
-            ];
-    
-            // Llama al modelo para realizar la actualización del usuario-cliente
-            $result = $this->UserClient->update($datos, $id);
-            if ($result === true) {
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Asociación cliente-usuario actualizada exitosamente'
-                ]);
-            } else {
-                // Suponiendo que $result contiene el mensaje de error de la base de datos en caso de falla
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al actualizar la asociación cliente-usuario: ' . $result
-                ]);
-            }
-        }
-    }
-}
-?>

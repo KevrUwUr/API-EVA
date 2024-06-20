@@ -6,19 +6,19 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 class QuestionController extends Controlador
 {
     private $Question;
+    private $authMiddleware;
 
     // Constructor de la clase
     public function __construct()
     {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
-            http_response_code(401); // Unauthorized
-            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
-            exit;
-        }
-        
-        // Se instancia el modelo Question
-        $this->Question = $this->modelo("questions");
+        // Crear instancia del middleware de autenticación
+        $this->authMiddleware = new AuthMiddleware();
+
+        // Ejecutar el middleware de autenticación
+        $this->authMiddleware->handle($_REQUEST, function ($request) {
+            // Se instancia el modelo Question
+            $this->Question = $this->modelo("questions");
+        });
     }
 
     public function Questions()
@@ -36,39 +36,11 @@ class QuestionController extends Controlador
     // Método para insertar un usuario
     public function postQuestion()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
+        // Usar middleware JsonValidationMiddleware
+        $jsonValidationMiddleware = new JsonValidationMiddleware(['question', 'survey_id', 'type', 'percentage', 'frm_option', 'conditional', 'id_conditional', 'conditional_answer', 'section']);
 
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
-
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
-
-            if (
-                !isset($data['question'])
-                || !isset($data['survey_id'])
-                || !isset($data['type'])
-                || !isset($data['percentage'])
-                || !isset($data['frm_option'])
-                || !isset($data['conditional'])
-                || !isset($data['id_conditional'])
-                || !isset($data['conditional_answer'])
-                || !isset($data['section'])
-            ) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ]);
-                return;
-            }
+        // Manejar la validación y procesamiento del usuario
+        $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
 
             // Asignar los valores del array $data al array $datos
             $datos = [
@@ -85,7 +57,7 @@ class QuestionController extends Controlador
 
             // Llama al modelo para realizar la inserción del usuario
             $result = $this->Question->create($datos);
-            if ($result === true) {
+            if ($result == true) {
                 echo json_encode([
                     'status' => true,
                     'message' => 'Pregunta creada exitosamente'
@@ -94,11 +66,10 @@ class QuestionController extends Controlador
                 // Suponiendo que $result contiene el mensaje de error de la base de datos en caso de falla
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al crear la pregunta: ' . $result,
-                    'datos' => 'Datos: '. json_encode($datos)
+                    'message' => 'Error al crear la pregunta: ' . $result['message']                    
                 ]);
             }
-        }
+        });
     }
 
     public function putQuestion($id)
@@ -176,7 +147,7 @@ class QuestionController extends Controlador
         if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
             // Llama al modelo para realizar la eliminación de la pregunta
             $result = $this->Question->delete($id);
-    
+
             // Verificar el resultado de la eliminación
             if ($result['status']) {
                 echo json_encode([
@@ -196,6 +167,4 @@ class QuestionController extends Controlador
             ]);
         }
     }
-    
-
 }

@@ -39,7 +39,7 @@ class Questions
       if ($result['count'] > 0) {
         // survey_id existe, proceder con la inserción
         $this->db->query('INSERT INTO questions (question, type, section, percentage, frm_option, conditional, id_conditional, conditional_answer, survey_id)
-                    VALUES (:question, :type, :section, :percentage, :frm_option, :conditional, :id_conditional, :conditional_answer, :survey_id)');
+                        VALUES (:question, :type, :section, :percentage, :frm_option, :conditional, :id_conditional, :conditional_answer, :survey_id)');
 
         // Asignar valores a los parámetros
         $this->db->bind(':question', $datos['question']);
@@ -54,30 +54,32 @@ class Questions
 
         // Ejecutar la consulta y retornar true si tiene éxito
         if ($this->db->execute()) {
-          return json_encode([
+          return [
             'status' => true,
             'message' => 'Pregunta creada exitosamente'
-          ]);
+          ];
         } else {
-          return json_encode([
+          return [
             'status' => false,
             'message' => 'Error al insertar los datos'
-          ]);
+          ];
         }
       } else {
         // survey_id no existe, retornar mensaje de error
-        return json_encode([
+        return [
           'status' => false,
           'message' => 'survey_id no encontrado'
-        ]);
+        ];
       }
     } catch (PDOException $e) {
-      return json_encode([
+      // Manejar errores de base de datos
+      return [
         'status' => false,
         'message' => 'Error de base de datos: ' . $e->getMessage()
-      ]);
+      ];
     }
   }
+
 
   public function update($datos, $id)
   {
@@ -129,41 +131,40 @@ class Questions
 
   public function delete($id)
   {
-      try {
-          // Verificar si la pregunta existe antes de intentar eliminarla
-          $question = $this->listByID($id); // Método que deberías tener en tu modelo para buscar por ID
-  
-          if (!$question) {
-              return [
-                  'status' => false,
-                  'message' => 'La pregunta con ID ' . $id . ' no existe'
-              ];
-          }
-  
-          // Prepara la consulta SQL para eliminar una pregunta
-          $this->db->query('DELETE FROM questions WHERE id = :id');
-  
-          // Asigna valores a los parámetros de la consulta
-          $this->db->bind(':id', $id);
-  
-          // Ejecuta la consulta
-          if ($this->db->execute()) {
-              return [
-                  'status' => true,
-                  'message' => 'Pregunta eliminada exitosamente'
-              ];
-          } else {
-              return [
-                  'status' => false,
-                  'message' => 'Error al eliminar la pregunta'
-              ];
-          }
-      } catch (PDOException $e) {
-          return [
-              'status' => false,
-              'message' => 'Error de base de datos: ' . $e->getMessage()
-          ];
+    try {
+      // Verificar si la pregunta existe antes de intentar eliminarla
+      $question = $this->listByID($id); // Método que deberías tener en tu modelo para buscar por ID
+
+      if (!$question) {
+        return [
+          'status' => false,
+          'message' => 'La pregunta con ID ' . $id . ' no existe'
+        ];
       }
+
+      // Prepara la consulta SQL para eliminar una pregunta
+      $this->db->query('DELETE FROM questions WHERE id = :id');
+
+      // Asigna valores a los parámetros de la consulta
+      $this->db->bind(':id', $id);
+
+      // Ejecuta la consulta
+      if ($this->db->execute()) {
+        return [
+          'status' => true,
+          'message' => 'Pregunta eliminada exitosamente'
+        ];
+      } else {
+        return [
+          'status' => false,
+          'message' => 'Error al eliminar la pregunta'
+        ];
+      }
+    } catch (PDOException $e) {
+      return [
+        'status' => false,
+        'message' => 'Error de base de datos: ' . $e->getMessage()
+      ];
+    }
   }
-  
 }

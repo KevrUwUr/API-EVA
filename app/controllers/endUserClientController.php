@@ -7,19 +7,19 @@ class EndUserClientController extends Controlador
 {
     // Propiedad para almacenar la instancia del modelo EndUser_Client
     private $EndUserClient;
+    private $authMiddleware;
 
     // Constructor de la clase
     public function __construct()
     {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
-            http_response_code(401); // Unauthorized
-            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
-            exit;
-        }
-        
-        // Se instancia el modelo EndUser_Client
-        $this->EndUserClient = $this->modelo("endUser_client");
+        // Crear instancia del middleware de autenticación
+        $this->authMiddleware = new AuthMiddleware();
+
+        // Ejecutar el middleware de autenticación
+        $this->authMiddleware->handle($_REQUEST, function ($request) {
+            // Se instancia el modelo EndUser_Client
+            $this->EndUserClient = $this->modelo("endUser_client");
+        });
     }
 
     // Método para obtener todos los registros de enduser_clients
@@ -39,44 +39,16 @@ class EndUserClientController extends Controlador
     // Método para crear nuevas asociaciones entre endUsers y clientes
     public function postEndUserClient()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
+        $jsonValidationMiddleware = new JsonValidationMiddleware(['idEndUser', 'idClient']);
 
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
-
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
-
-            // Si $data no es un array, convertirlo en un array
-            if (!isset($data[0])) {
-                $data = [$data];
-            }
-
+        $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
             // Iterar sobre cada elemento del array y realizar la inserción
             $results = [];
             foreach ($data as $datos) {
-                // Verificar si los datos requeridos están presentes en la solicitud
-                if (!isset($datos['idEndUser']) || !isset($datos['idClient'])) {
-                    $results[] = [
-                        'idEndUser' => $datos['idEndUser'] ?? null,
-                        'idClient' => $datos['idClient'] ?? null,
-                        'status' => false,
-                        'message' => 'Datos incompletos en la solicitud'
-                    ];
-                    continue;
-                }
 
                 // Llama al modelo para realizar la inserción del endUser-cliente
                 $result = $this->EndUserClient->create($datos);
-                if ($result === true) {
+                if ($result['status'] === true) {
                     $results[] = [
                         'idEndUser' => $datos['idEndUser'],
                         'idClient' => $datos['idClient'],
@@ -89,16 +61,14 @@ class EndUserClientController extends Controlador
                         'idEndUser' => $datos['idEndUser'],
                         'idClient' => $datos['idClient'],
                         'status' => false,
-                        'message' => 'Error al crear la asociación cliente-endUser: ' . $result
+                        'message' => 'Error al crear la asociación cliente-endUser: ' . $result['message']
                     ];
                 }
             }
 
-            // Retornar los resultados como un array de JSON
             echo json_encode($results);
-        }
+        });
     }
-
     // Método para actualizar una asociación endUser-cliente por ID
     public function putEndUserClient($id)
     {

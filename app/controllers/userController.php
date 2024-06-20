@@ -6,17 +6,19 @@ defined('BASEPATH') or exit('No se permite acceso directo');
 class UserController extends Controlador
 {
     private $User;
+    private $authMiddleware;
+
     // Constructor de la clase
     public function __construct()
     {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization']) || !Base::tokenValidate(str_replace('Bearer ', '', $headers['Authorization']))) {
-            http_response_code(401); // Unauthorized
-            echo json_encode(['status' => 'error', 'message' => 'Token no válido o expirado']);
-            exit;
-        }
-        // Se instancia el modelo User
-        $this->User = $this->modelo("user");
+        // Crear instancia del middleware de autenticación
+        $this->authMiddleware = new AuthMiddleware();
+
+        // Ejecutar el middleware de autenticación
+        $this->authMiddleware->handle($_REQUEST, function ($request) {
+            // Se instancia el modelo User
+            $this->User = $this->modelo("user");
+        });
     }
 
     public function Users()
@@ -51,24 +53,12 @@ class UserController extends Controlador
 
     public function postUser()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $body = file_get_contents('php://input');
-            $data = json_decode($body, true);
+        // Usar middleware JsonValidationMiddleware
+        $jsonValidationMiddleware = new JsonValidationMiddleware(['lastname', 'firstname', 'middlename', 'email', 'password', 'type', 'language', 'registration_date', 'last_visit_date']);
 
-            if (is_null($data)) {
-                echo json_encode(['status' => false, 'message' => 'Error al decodificar JSON']);
-                return;
-            }
-
-            // Verificación de campos requeridos
-            $requiredFields = ['lastname', 'firstname', 'middlename', 'email', 'password', 'type', 'language', 'registration_date', 'last_visit_date'];
-            foreach ($requiredFields as $field) {
-                if (!isset($data[$field])) {
-                    echo json_encode(['status' => false, 'message' => "El campo $field es obligatorio"]);
-                    return;
-                }
-            }
-
+        // Manejar la validación y procesamiento del usuario
+        $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
+            // Procesar creación de usuario
             $datos = [
                 'lastname' => trim($data['lastname']),
                 'firstname' => trim($data['firstname']),
@@ -81,8 +71,9 @@ class UserController extends Controlador
                 'last_visit_date' => trim($data['last_visit_date']),
             ];
 
+            // Intentar crear usuario
             if ($this->User->create($datos)) {
-                $idCreation = $this->User->getId(); // Obtener el ID del usuario recién creado
+                $idCreation = $this->User->getId();
                 echo json_encode([
                     'status' => true,
                     'message' => 'Usuario creado exitosamente',
@@ -91,20 +82,21 @@ class UserController extends Controlador
             } else {
                 echo json_encode(['status' => false, 'message' => 'Error al crear el usuario']);
             }
-        }
+        });
     }
+
 
     public function putUser($id)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $body = file_get_contents('php://input');
             $data = json_decode($body, true);
-    
+
             if (is_null($data)) {
                 echo json_encode(['status' => false, 'message' => 'Error al decodificar JSON']);
                 return;
             }
-    
+
             $datos = [];
             if (isset($data['lastname'])) $datos['lastname'] = trim($data['lastname']);
             if (isset($data['firstname'])) $datos['firstname'] = trim($data['firstname']);
@@ -115,17 +107,17 @@ class UserController extends Controlador
             if (isset($data['language'])) $datos['language'] = trim($data['language']);
             if (isset($data['registration_date'])) $datos['registration_date'] = trim($data['registration_date']);
             if (isset($data['last_visit_date'])) $datos['last_visit_date'] = trim($data['last_visit_date']);
-    
+
             // Filtrar los campos que no estén vacíos
             $datos = array_filter($datos, function ($value) {
                 return $value !== '';
             });
-    
+
             if (empty($datos)) {
                 echo json_encode(['status' => false, 'message' => 'No se proporcionaron campos para actualizar']);
                 return;
             }
-    
+
             if ($this->User->update($datos, $id)) {
                 echo json_encode(['status' => true, 'message' => 'Usuario actualizado exitosamente']);
             } else {
@@ -133,7 +125,7 @@ class UserController extends Controlador
             }
         }
     }
-    
+
 
     public function patchUser($id)
     {

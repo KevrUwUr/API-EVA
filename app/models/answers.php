@@ -40,12 +40,28 @@ class Answers
                 $this->db->bind(':question_id', $datos['question_id']);
                 $this->db->bind(':date', $datos['date']);
 
-                return $this->db->execute();
+                if ($this->db->execute()) {
+                    return [
+                        'status' => true,
+                        'message' => 'Respuesta creada exitosamente'
+                    ];
+                } else {
+                    return [
+                        'status' => false,
+                        'message' => 'Error al insertar la respuesta'
+                    ];
+                }
             } else {
-                return 'survey_id o question_id no encontrado';
+                return [
+                    'status' => false,
+                    'message' => 'survey_id o question_id no encontrado'
+                ];
             }
         } catch (PDOException $e) {
-            return 'Error de base de datos: ' . $e->getMessage();
+            return [
+                'status' => false,
+                'message' => 'Error de base de datos: ' . $e->getMessage()
+            ];
         }
     }
 
