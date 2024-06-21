@@ -45,36 +45,59 @@ class clientController extends Controlador
         echo json_encode($listar);
     }
 
-    // Método para insertar un cliente
     public function postClient()
-    {
-        // Usar middleware JsonValidationMiddleware
-        $jsonValidationMiddleware = new JsonValidationMiddleware(['cliente', 'logo']);
+{
+    // Verificar si el método de la solicitud es POST
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Verificar que se han recibido datos del formulario
+        if (isset($_POST['cliente']) && isset($_FILES['logo'])) {
+            $cliente = $_POST['cliente'];
+            $logo = $_FILES['logo'];
 
-        // Manejar la validación y procesamiento del usuario
-        $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
+            // Directorio donde se guardará el archivo de imagen
+            $uploadDirectory = 'C:/xampp/htdocs/EVA-React/public/clientes/';
+            $uploadPath = $uploadDirectory . basename($logo['name']);
 
-            $datos = [
-                'client' => trim($data['cliente']),
-                'logo' => trim($data['logo']),
-            ];
+            // Intentar mover el archivo cargado al directorio de destino
+            if (move_uploaded_file($logo['tmp_name'], $uploadPath)) {
+                // Preparar datos para guardar en la base de datos
+                $datos = [
+                    'client' => trim($cliente),
+                    'logo' => basename($logo['name']),
+                ];
 
-            // echo json_encode(['Datos de la peticion' => $datos]);
-
-            // Llama al modelo para realizar la inserción del cliente
-            if ($this->Cliente->create($datos)) {
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Cliente creado exitosamente'
-                ]);
+                // Llama al modelo para realizar la inserción del cliente
+                if ($this->Cliente->create($datos)) {
+                    echo json_encode([
+                        'status' => true,
+                        'message' => 'Cliente creado exitosamente',
+                        'name' => basename($logo['name'])
+                    ]);
+                } else {
+                    echo json_encode([
+                        'status' => false,
+                        'message' => 'Error al crear el cliente'
+                    ]);
+                }
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al crear el cliente'
+                    'message' => 'Error al subir la imagen'
                 ]);
             }
-        });
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Datos incompletos en la solicitud'
+            ]);
+        }
+    } else {
+        echo json_encode([
+            'status' => false,
+            'message' => 'Método no permitido'
+        ]);
     }
+}
 
     public function putClient($id)
     {
