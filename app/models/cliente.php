@@ -55,15 +55,15 @@ class Cliente
         return $this->db->execute();
     }
 
-    public function update($datos, $id)
+    public function update($datos)
     {
         // Prepara la consulta SQL para actualizar un cliente
-        $this->db->query('UPDATE clients SET client = :cliente, logo = :logo, state = 1 WHERE id = :id');
+        $this->db->query('UPDATE clients SET client = :cliente, logo = :logo WHERE id = :id');
 
         // Asigna valores a los parámetros de la consulta
-        $this->db->bind(':cliente', $datos['client']);
+        $this->db->bind(':cliente', $datos['cliente']);
         $this->db->bind(':logo', $datos['logo']);
-        $this->db->bind(':state', $datos['state']);
+        $this->db->bind(':id', $datos['id']);
 
         // Ejecuta la consulta y retorna true si tiene éxito, false si falla
         return $this->db->execute();

@@ -46,106 +46,116 @@ class clientController extends Controlador
     }
 
     public function postClient()
-{
-    // Verificar si el método de la solicitud es POST
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Verificar que se han recibido datos del formulario
-        if (isset($_POST['cliente']) && isset($_FILES['logo'])) {
-            $cliente = $_POST['cliente'];
+    {
+        // Verificar si el método de la solicitud es POST
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Verificar que se han recibido datos del formulario
+
             $logo = $_FILES['logo'];
 
-            // Directorio donde se guardará el archivo de imagen
-            $uploadDirectory = 'C:/xampp/htdocs/EVA-React/public/clientes/';
-            $uploadPath = $uploadDirectory . basename($logo['name']);
+            if (isset($_POST['cliente']) && isset($_FILES['logo'])) {
+                $cliente = $_POST['cliente'];
+                $logo = $_FILES['logo'];
 
-            // Intentar mover el archivo cargado al directorio de destino
-            if (move_uploaded_file($logo['tmp_name'], $uploadPath)) {
-                // Preparar datos para guardar en la base de datos
-                $datos = [
-                    'client' => trim($cliente),
-                    'logo' => basename($logo['name']),
-                ];
+                // Directorio donde se guardará el archivo de imagen
+                $uploadDirectory = 'C:/xampp/htdocs/EVA-React/public/clientes/';
+                $uploadPath = $uploadDirectory . basename($logo['name']);
 
-                // Llama al modelo para realizar la inserción del cliente
-                if ($this->Cliente->create($datos)) {
-                    echo json_encode([
-                        'status' => true,
-                        'message' => 'Cliente creado exitosamente',
-                        'name' => basename($logo['name'])
-                    ]);
+                // Intentar mover el archivo cargado al directorio de destino
+                if (move_uploaded_file($logo['tmp_name'], $uploadPath)) {
+                    // Preparar datos para guardar en la base de datos
+                    $datos = [
+                        'client' => trim($cliente),
+                        'logo' => basename($logo['name']),
+                    ];
+
+                    // Llama al modelo para realizar la inserción del cliente
+                    if ($this->Cliente->create($datos)) {
+                        echo json_encode([
+                            'status' => true,
+                            'message' => 'Cliente creado exitosamente',
+                            'name' => basename($logo['name'])
+                        ]);
+                    } else {
+                        echo json_encode([
+                            'status' => false,
+                            'message' => 'Error al crear el cliente'
+                        ]);
+                    }
                 } else {
                     echo json_encode([
                         'status' => false,
-                        'message' => 'Error al crear el cliente'
+                        'message' => 'Error al subir la imagen'
                     ]);
                 }
             } else {
                 echo json_encode([
                     'status' => false,
-                    'message' => 'Error al subir la imagen'
+                    'message' => 'Datos incompletos en la solicitud'
                 ]);
             }
         } else {
             echo json_encode([
                 'status' => false,
-                'message' => 'Datos incompletos en la solicitud'
+                'message' => 'Método no permitido'
             ]);
         }
-    } else {
-        echo json_encode([
-            'status' => false,
-            'message' => 'Método no permitido'
-        ]);
     }
-}
 
     public function putClient($id)
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-            // Leer el cuerpo de la solicitud
-            $body = file_get_contents('php://input');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Verificar que se han recibido datos del formulario
+            if (isset($_POST['cliente']) && isset($_FILES['logo'])) {
+                $cliente = $_POST['cliente'];
+                $logo = $_FILES['logo'];
 
-            // Decodificar el JSON recibido en un array asociativo
-            $data = json_decode($body, true);
+                // Directorio donde se guardará el archivo de imagen
+                $uploadDirectory = 'C:/xampp/htdocs/EVA-React/public/clientes/';
+                $uploadPath = $uploadDirectory . basename($logo['name']);
 
-            // Verificar si json_decode tuvo éxito
-            if (is_null($data)) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al decodificar JSON'
-                ]);
-                return;
-            }
+                // Intentar mover el archivo cargado al directorio de destino
+                if (move_uploaded_file($logo['tmp_name'], $uploadPath)) {
+                    // Preparar datos para guardar en la base de datos
+                    $datos = [
+                        'cliente' => trim($cliente),
+                        'logo' => basename($logo['name']),
+                        'id' => $id
+                    ];
 
-            if (!isset($data['cliente']) || !isset($data['logo'])) {
+                    // Llama al modelo para realizar la actualización del cliente
+                    if ($this->Cliente->update($datos)) {
+                        echo json_encode([
+                            'status' => true,
+                            'message' => 'Cliente actualizado exitosamente'
+                        ]);
+                    } else {
+                        echo json_encode([
+                            'status' => false,
+                            'message' => 'Error al actualizar el cliente'
+                        ]);
+                    }
+                } else {
+                    echo json_encode([
+                        'status' => false,
+                        'message' => 'Error al subir la imagen'
+                    ]);
+                }
+            } else {
                 echo json_encode([
                     'status' => false,
                     'message' => 'Datos incompletos en la solicitud'
                 ]);
-                return;
             }
-
-            $datos = [
-                'id' => $id,
-                'client' => trim($data['cliente']),
-                'logo' => trim($data['logo']),
-                'state' => trim($data['state']),
-            ];
-
-            // Llama al modelo para realizar la actualización del cliente
-            if ($this->Cliente->update($datos, $id)) {
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Cliente actualizado exitosamente'
-                ]);
-            } else {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al actualizar el cliente'
-                ]);
-            }
+        } else {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Método no permitido'
+            ]);
         }
     }
+
+
 
     public function patchClient($id)
     {
