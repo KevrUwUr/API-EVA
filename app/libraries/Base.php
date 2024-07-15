@@ -67,6 +67,11 @@ class Base
         $this->stmt->bindValue($parametro, $valor, $tipo);
     }
 
+        // MÃ©todo para obtener errores
+        public function getError() {
+            return $this->error ? 'Error al conectar a la base de datos: ' . $this->error : 'ConexiÃ³n a la base de datos exitosa!';
+        }
+
     // Ejecuta la consulta
     public function execute()
     {
