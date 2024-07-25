@@ -90,57 +90,23 @@ class QuestionController extends Controlador
                 return;
             }
 
-            // Verificar si las claves existen en el array
-            if (
-                !isset($data['question'])
-                || !isset($data['survey_id'])
-                || !isset($data['type'])
-                || !isset($data['percentage'])
-                || !isset($data['frm_option'])
-                || !isset($data['conditional'])
-                || !isset($data['id_conditional'])
-                || !isset($data['conditional_answer'])
-                || !isset($data['section'])
-            ) {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Datos incompletos en la solicitud'
-                ]);
-                return;
+            // Limpiar los datos recibidos
+            $datos = [];
+            foreach ($data as $key => $value) {
+                $datos[$key] = trim($value);
             }
-
-            // Asignar los valores del array $data al array $datos
-            $datos = [
-                'question' => trim($data['question']),
-                'survey_id' => trim($data['survey_id']),
-                'type' => trim($data['type']),
-                'percentage' => trim($data['percentage']),
-                'frm_option' => trim($data['frm_option']),
-                'conditional' => trim($data['conditional']),
-                'id_conditional' => trim($data['id_conditional']),
-                'conditional_answer' => trim($data['conditional_answer']),
-                'section' => trim($data['section']),
-            ];
 
             // Remover campos vacíos para no actualizar con datos vacíos
             $datos = array_filter($datos, function ($value) {
                 return $value !== '';
             });
 
-            // Llama al modelo para realizar la actualización del usuario
-            if ($this->Question->update($datos, $id)) {
-                echo json_encode([
-                    'status' => true,
-                    'message' => 'Pregunta actualizada exitosamente'
-                ]);
-            } else {
-                echo json_encode([
-                    'status' => false,
-                    'message' => 'Error al actualizar la pregunta'
-                ]);
-            }
+            // Llama al modelo para realizar la actualización de la pregunta
+            $result = $this->Question->update($datos, $id);
+            echo $result;
         }
     }
+
 
     public function deleteQuestion($id)
     {

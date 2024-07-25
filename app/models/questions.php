@@ -84,32 +84,33 @@ class Questions
   public function update($datos, $id)
   {
     try {
-      // Prepara la consulta SQL para actualizar una pregunta
-      $this->db->query('UPDATE questions SET 
-                question = :question, 
-                type = :type, 
-                section = :section, 
-                percentage = :percentage, 
-                frm_option = :frm_option, 
-                conditional = :conditional, 
-                id_conditional = :id_conditional, 
-                conditional_answer = :conditional_answer, 
-                survey_id = :survey_id 
-                WHERE id = :id');
+      // Comienza la consulta SQL
+      $query = 'UPDATE questions SET ';
 
-      // Asigna valores a los parámetros de la consulta
+      // Inicializa un array para los fragmentos de la consulta y los valores
+      $setFragments = [];
+      $values = [];
+
+      // Recorre los datos y construye los fragmentos de la consulta y los valores
+      foreach ($datos as $key => $value) {
+        $setFragments[] = "{$key} = :{$key}";
+        $values[":{$key}"] = $value;
+      }
+
+      // Combina los fragmentos en la consulta
+      $query .= implode(', ', $setFragments);
+      $query .= ' WHERE id = :id';
+
+      // Prepara la consulta
+      $this->db->query($query);
+
+      // Asigna los valores a los parámetros de la consulta
+      foreach ($values as $placeholder => $val) {
+        $this->db->bind($placeholder, $val);
+      }
       $this->db->bind(':id', $id);
-      $this->db->bind(':question', $datos['question']);
-      $this->db->bind(':type', $datos['type']);
-      $this->db->bind(':section', $datos['section']);
-      $this->db->bind(':percentage', $datos['percentage']);
-      $this->db->bind(':frm_option', $datos['frm_option']);
-      $this->db->bind(':conditional', $datos['conditional']);
-      $this->db->bind(':id_conditional', $datos['id_conditional']);
-      $this->db->bind(':conditional_answer', $datos['conditional_answer']);
-      $this->db->bind(':survey_id', $datos['survey_id']);
 
-      // Ejecuta la consulta y retorna true si tiene éxito, false si falla
+      // Ejecuta la consulta y retorna el resultado
       if ($this->db->execute()) {
         return json_encode([
           'status' => true,
@@ -128,6 +129,7 @@ class Questions
       ]);
     }
   }
+
 
   public function delete($id)
   {
