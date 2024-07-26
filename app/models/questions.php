@@ -38,8 +38,8 @@ class Questions
 
       if ($result['count'] > 0) {
         // survey_id existe, proceder con la inserción
-        $this->db->query('INSERT INTO questions (question, type, section, percentage, frm_option, conditional, id_conditional, conditional_answer, survey_id)
-                        VALUES (:question, :type, :section, :percentage, :frm_option, :conditional, :id_conditional, :conditional_answer, :survey_id)');
+        $this->db->query('INSERT INTO questions (question, type, section, percentage, frm_option, conditional, id_conditional, conditional_answer, survey_id, selected_answer, select_option)
+                        VALUES (:question, :type, :section, :percentage, :frm_option, :conditional, :id_conditional, :conditional_answer, :survey_id, :selected_answer, :select_option)');
 
         // Asignar valores a los parámetros
         $this->db->bind(':question', $datos['question']);
@@ -51,6 +51,8 @@ class Questions
         $this->db->bind(':id_conditional', $datos['id_conditional']);
         $this->db->bind(':conditional_answer', $datos['conditional_answer']);
         $this->db->bind(':survey_id', $datos['survey_id']);
+        $this->db->bind(':selected_answer', $datos['selected_answer']);
+        $this->db->bind(':select_option', $datos['select_option']);
 
         // Ejecutar la consulta y retornar true si tiene éxito
         if ($this->db->execute()) {

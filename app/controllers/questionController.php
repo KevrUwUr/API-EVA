@@ -37,7 +37,7 @@ class QuestionController extends Controlador
     public function postQuestion()
     {
         // Usar middleware JsonValidationMiddleware
-        $jsonValidationMiddleware = new JsonValidationMiddleware(['question', 'survey_id', 'type', 'percentage', 'frm_option', 'conditional', 'id_conditional', 'conditional_answer', 'section']);
+        $jsonValidationMiddleware = new JsonValidationMiddleware(['question', 'survey_id', 'type', 'percentage', 'frm_option', 'conditional', 'id_conditional', 'conditional_answer', 'section', 'selected_answer', 'select_option']);
 
         // Manejar la validación y procesamiento del usuario
         $jsonValidationMiddleware->handle(file_get_contents('php://input'), function ($data) {
@@ -53,6 +53,8 @@ class QuestionController extends Controlador
                 'id_conditional' => trim($data['id_conditional']),
                 'conditional_answer' => trim($data['conditional_answer']),
                 'section' => trim($data['section']),
+                'selected_answer' => trim($data['selected_answer']),
+                'select_option' => trim($data['select_option']),
             ];
 
             // Llama al modelo para realizar la inserción del usuario
